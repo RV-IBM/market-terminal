@@ -34,7 +34,7 @@ with col2:
         with st.spinner(f"fetching remote telemetry for {ticker}..."):
             try:
                 # Replace with your actual Pipedream HTTP Trigger URL
-                PIPEDREAM_URL = "YOUR_PIPEDREAM_URL" 
+                PIPEDREAM_URL = st.secrets["https://eosg30vmismhlpj.m.pipedream.net"] 
                 res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=15)
                 
                 if res.status_code == 200:
