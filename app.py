@@ -33,18 +33,20 @@ with col2:
     if analyze_btn and ticker:
         with st.spinner(f"fetching remote telemetry for {ticker}..."):
             try:
-                # Use a proper key name, NOT the URL itself
+                # 1. Pull secret using the LABEL
                 PIPEDREAM_URL = st.secrets["PIPEDREAM_URL"] 
                 
-                # Now use the variable for your request
+                # 2. Execute request
                 res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=15)
                 
+                # 3. Handle response
                 if res.status_code == 200:
                     prediction = res.json().get("prediction")
                     st.success(f"ANALYSIS COMPLETE: {ticker}")
                     st.write(prediction)
                 else:
                     st.error(f"SYSTEM ERROR: {res.status_code}")
+                    
             except Exception as e:
                 st.error(f"CONNECTION FAILURE: {str(e)}")
 # Add this to your Sidebar
