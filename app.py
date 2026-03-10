@@ -33,9 +33,11 @@ with col2:
     if analyze_btn and ticker:
         with st.spinner(f"fetching remote telemetry for {ticker}..."):
             try:
-                # Replace with your actual Pipedream HTTP Trigger URL
-                PIPEDREAM_URL = st.secrets["https://eosg30vmismhlpj.m.pipedream.net"] 
-                res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=15)
+                # Access the secret using the variable name defined in your Secrets settings
+PIPEDREAM_URL = st.secrets["https://eosg30vmismhlpj.m.pipedream.net"]
+
+# Now use the variable for your request
+res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=15)
                 
                 if res.status_code == 200:
                     prediction = res.json().get("prediction")
