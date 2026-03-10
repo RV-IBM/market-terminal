@@ -11,7 +11,7 @@ st.markdown("""
     .main { background-color: #0e1117; color: #ffffff; }
     .stTextInput>div>div>input { color: #00ff00; font-family: 'Courier New', Courier, monospace; }
     </style>
-    """, unsafe_allow_status_code=True)
+    """, unsafe_allow_html=True)
 
 st.title("📟 ALPHA-TERMINAL SYSTEM")
 st.divider()
