@@ -45,3 +45,10 @@ with col2:
                     st.error(f"SYSTEM ERROR: {res.status_code}")
             except Exception as e:
                 st.error(f"CONNECTION FAILURE: {str(e)}")
+# Add this to your Sidebar
+with st.sidebar:
+    st.header("💳 SUBSCRIPTION")
+    status = st.radio("Account Type:", ["Free", "Pro (Locked)"])
+    if status == "Free":
+        st.warning("You are on the Limited Plan.")
+        st.button("Upgrade to Pro for $19/mo")                
