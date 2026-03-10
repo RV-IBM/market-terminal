@@ -37,7 +37,7 @@ with col2:
                 PIPEDREAM_URL = st.secrets["PIPEDREAM_URL"] 
                 
                 # 2. Execute request
-                res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=15)
+                res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=30)
                 
                 # 3. Handle response
                 if res.status_code == 200:
