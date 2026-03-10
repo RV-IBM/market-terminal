@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 
 # Terminal Configuration
-st.set_page_config(page_title="Alpha-Terminal V1", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="mySTOCK", layout="wide", initial_sidebar_state="collapsed")
 
 # Custom CSS for a "Bloomberg" dark-room feel
 st.markdown("""
