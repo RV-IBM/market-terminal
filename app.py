@@ -3,65 +3,64 @@ import pandas as pd
 import yfinance as yf
 import requests
 
-# --- 1. CONFIGURATION ---
+# 1. UI Setup
 st.set_page_config(page_title="mySTOCK", layout="wide")
 
-# Custom CSS for a terminal-like feel
+# Dark Mode CSS
 st.markdown("""
     <style>
     .main { background-color: #0e1117; color: #ffffff; }
-    .stMetric { background-color: #161b22; padding: 10px; border-radius: 5px; }
+    .stMetric { background-color: #161b22; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. SIDEBAR (MARKET LEADERS & PRO UPGRADE) ---
+# 2. Sidebar: Top 5 & Pro Subscription
 with st.sidebar:
-    st.title("Market Leaders")
-    st.metric(label="NVDA", value="$822.79", delta="3.2%")
-    st.metric(label="TSLA", value="$175.34", delta="-1.1%")
+    st.title("💠 TERMINAL CONTROL")
+    
+    st.subheader("Market Leaders")
+    # Quick visual metrics for the sidebar
+    col1, col2 = st.columns(2)
+    col1.metric("NVDA", "822.79", "3.2%")
+    col2.metric("BTC", "67k", "2.1%")
     
     st.divider()
     
-    st.header("🚀 Upgrade to Pro")
-    st.write("Unlock unlimited searches & priority analysis.")
-    if st.button("Get Pro Access - $19/mo", type="primary"):
-        st.write("Redirecting to secure payment...")
-        # Add your Stripe Payment Link here
+    # Pro Subscription Section (Fills the space)
+    st.subheader("💎 PRO ACCESS")
+    st.info("Institutional-grade intelligence.")
+    st.markdown("""
+    - ✅ **Unlimited** AI Queries
+    - ✅ **Real-time** Data Feeds
+    - ✅ **Advanced** Technical Analysis
+    """)
+    if st.button("UPGRADE - $19/mo", type="primary", use_container_width=True):
+        st.write("Redirecting to Stripe Checkout...")
 
-# --- 3. MAIN INTERFACE ---
-st.title("mySTOCK")
-ticker = st.text_input("ENTER TICKER SYSTEM (e.g., NVDA, AAPL, BTC-USD):").upper()
+# 3. Main Dashboard logic
+st.title("🚀 mySTOCK SYSTEM")
+ticker = st.text_input("QUERY TICKER (e.g., AAPL, NVDA, TSLA):").upper()
 
-if st.button("EXECUTE DEEP-DIVE"):
+if st.button("EXECUTE ANALYSIS"):
     if ticker:
-        # --- 4. PRICE CHARTING ---
-        st.subheader(f" {ticker} PERFORMANCE (LAST 30 DAYS)")
-        try:
-            data = yf.download(ticker, period="1mo", interval="1d")
-            if not data.empty:
-                st.line_chart(data['Close'])
-            else:
-                st.error("TELEMETRY ERROR: TICKER NOT FOUND.")
-        except Exception as e:
-            st.error(f"CHARTING ERROR: {str(e)}")
-
-        # --- 5. AI ANALYSIS ---
-        with st.spinner(f"Initiating AI Neural Analysis for {ticker}..."):
+        # CHARTING (Instant Feedback)
+        st.subheader(f" {ticker} Trend Analysis")
+        data = yf.download(ticker, period="1mo", interval="1d")
+        if not data.empty:
+            st.line_chart(data['Close'])
+        
+        # AI ANALYSIS (Remote Call)
+        with st.spinner(f"Contacting remote neural network for {ticker}..."):
             try:
-                # Always use st.secrets; never hardcode URLs in your script
+                # Use the secret key name, not the URL
                 PIPEDREAM_URL = st.secrets["PIPEDREAM_URL"]
-                
-                # Timeout set to 60s to accommodate AI processing time
                 res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=60)
                 
                 if res.status_code == 200:
-                    prediction = res.json().get("prediction", "No analysis returned.")
-                    st.success(f"ANALYSIS COMPLETE: {ticker}")
-                    st.markdown(f"### 🤖 AI Market Intelligence")
+                    prediction = res.json().get("prediction", "No analysis found.")
+                    st.success("TELEMETRY RECEIVED")
                     st.write(prediction)
                 else:
-                    st.error(f"AI SYSTEM OFFLINE: Error {res.status_code}")
+                    st.error(f"PIPEDREAM ERROR: {res.status_code}")
             except Exception as e:
-                st.error(f"REMOTE CONNECTION FAILURE: {str(e)}")
-    else:
-        st.warning("PLEASE ENTER A VALID TICKER TO BEGIN.")
+                st.error(f"SYSTEM FAILURE: {str(e)}")
