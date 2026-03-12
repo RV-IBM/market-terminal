@@ -33,12 +33,13 @@ with st.sidebar:
     - ✅ **Unlimited** AI Queries
     - ✅ **Real-time** Data Feeds
     - ✅ **Advanced** Technical Analysis
+    - ✅ **Predictions** On Stock Crashes 
     """)
     if st.button("UPGRADE - $19/mo", type="primary", use_container_width=True):
         st.write("Redirecting to Stripe Checkout...")
 
 # 3. Main Dashboard logic
-st.title("🚀 mySTOCK SYSTEM")
+st.title(" mySTOCK ")
 ticker = st.text_input("QUERY TICKER (e.g., AAPL, NVDA, TSLA):").upper()
 
 if st.button("EXECUTE ANALYSIS"):
