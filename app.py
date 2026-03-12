@@ -16,7 +16,7 @@ st.markdown("""
     .stButton>button { background-color: #00f2ff; color: black; border-radius: 5px; font-weight: bold; border: none; box-shadow: 0 0 15px #00f2ff; width: 100%; }
     hr { border-top: 1px solid #00f2ff !important; }
     </style>
-    """, unsafe_allow_html=True
+    """, unsafe_allow_html=True)
 
 # --- 2. SIDEBAR: LIVE TOP 5 & SUBSCRIPTION ---
 with st.sidebar:
