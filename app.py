@@ -16,7 +16,7 @@ st.markdown("""
 
 # --- 2. SIDEBAR (MARKET LEADERS & PRO UPGRADE) ---
 with st.sidebar:
-    st.title("mySTOCK")
+    st.title("Market Leaders")
     st.metric(label="NVDA", value="$822.79", delta="3.2%")
     st.metric(label="TSLA", value="$175.34", delta="-1.1%")
     
@@ -35,7 +35,7 @@ ticker = st.text_input("ENTER TICKER SYSTEM (e.g., NVDA, AAPL, BTC-USD):").upper
 if st.button("EXECUTE DEEP-DIVE"):
     if ticker:
         # --- 4. PRICE CHARTING ---
-        st.subheader(f"📈 {ticker} PERFORMANCE (LAST 30 DAYS)")
+        st.subheader(f" {ticker} PERFORMANCE (LAST 30 DAYS)")
         try:
             data = yf.download(ticker, period="1mo", interval="1d")
             if not data.empty:
