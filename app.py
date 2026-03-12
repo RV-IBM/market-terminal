@@ -6,37 +6,42 @@ import requests
 # --- 1. SETTINGS & NEON THEME ---
 st.set_page_config(page_title="mySTOCK", layout="wide")
 
-# High-tech Neon Blue Styling
+# Neon Blue & Dark Slate Styling
 st.markdown("""
     <style>
     .main { background-color: #050a10; color: #00f2ff; }
     .stMetric { background-color: #0b1420; border: 1px solid #00f2ff; border-radius: 10px; padding: 15px; box-shadow: 0 0 10px #00f2ff; }
     [data-testid="stSidebar"] { background-color: #03070b; border-right: 1px solid #00f2ff; }
-    h1, h2, h3 { color: #00f2ff; text-shadow: 0 0 5px #00f2ff; font-family: 'Courier New', monospace; }
-    .stButton>button { background-color: #00f2ff; color: black; border-radius: 5px; font-weight: bold; border: none; box-shadow: 0 0 15px #00f2ff; }
+    h1, h2, h3 { color: #00f2ff; text-shadow: 0 0 8px #00f2ff; font-family: 'Courier New', monospace; }
+    .stButton>button { background-color: #00f2ff; color: black; border-radius: 5px; font-weight: bold; border: none; box-shadow: 0 0 15px #00f2ff; width: 100%; }
+    hr { border-top: 1px solid #00f2ff !important; }
     </style>
-    """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True
 
 # --- 2. SIDEBAR: LIVE TOP 5 & SUBSCRIPTION ---
 with st.sidebar:
-    st.title("⚡ TERMINAL CORE")
+    st.title("TERMINAL CORE")
+    st.subheader("LIVE FEED: TOP 5")
     
-    st.subheader("📡 LIVE SECTOR FEED")
-    # Top 5 tickers for the sidebar
-    top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
+    # Live Tickers
+    top_tickers = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
     
-    for t in top_5:
-        ticker_data = yf.Ticker(t)
-        # Using fast info for current price/change
-        price = ticker_data.fast_info['last_price']
-        change = ticker_data.fast_info['year_to_date_return'] * 100 # Approx change
-        
-        # High-tech Buy/Sell logic based on basic trend
-        signal = "BUY" if change > 0 else "SELL"
-        color = "🟢" if signal == "BUY" else "🔴"
-        
-        st.metric(label=f"{color} {t} | {signal}", value=f"${price:.2f}", delta=f"{change:.2f}%")
-    
+    for t in top_tickers:
+        try:
+            # Fetching live data via Ticker object
+            stock = yf.Ticker(t)
+            price = stock.fast_info['last_price']
+            # Calculate daily change %
+            prev_close = stock.fast_info['previous_close']
+            daily_change = ((price - prev_close) / prev_close) * 100
+        # Buy/Sell signal logic based on 24h trend
+            signal = "BUY" if daily_change > 0 else "SELL"
+            icon = "🟢" if signal == "BUY" else "🔴"
+            
+            st.metric(label=f"{icon} {t} | {signal}", value=f"${price:.2f}", delta=f"{daily_change:.2f}%")
+        except:
+            st.sidebar.error(f"Feed error on {t}")
+            
     st.divider()
     
     # WORKING PRO LINK
@@ -56,9 +61,9 @@ st.title("mySTOCK")
 # Create a top row of stats to fill space
 m1, m2, m3, m4 = st.columns(4)
 m1.metric("NETWORK STATUS", "ENCRYPTED", "STABLE")
-m2.metric("S&P 500", "5,123", "+0.4%")
+m2.metric("TOTAL VOLUME", "12.4B", "+2.1%")
 m3.metric("BTC DOMINANCE", "52.4%", "UP")
-m4.metric("AI LATENCY", "142ms", "-12ms")
+m4.metric("SYSTEM LATENCY", "142ms", "-12ms")
 
 st.divider()
 
@@ -82,13 +87,15 @@ if st.button("EXECUTE NEURAL DIVE"):
             st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
             st.write(f"**Volume:** {info.get('volume', 'N/A')}")
 
-        # AI Analysis Call
-        with st.spinner("Decrypting Market Intelligence..."):
+     # AI Analysis Call (Pipedream)
+        with st.spinner("Decrypting Neural Data..."):
             try:
                 url = st.secrets["PIPEDREAM_URL"]
                 res = requests.post(url, json={"ticker": ticker_input}, timeout=60)
                 if res.status_code == 200:
-                    st.success("TELEMETRY DECODED")
-                    st.write(res.json().get("prediction"))
+                    st.success("DECODING SUCCESS")
+                    st.write(res.json().get("prediction", "No analysis found."))
+                else:
+                    st.error(f"PIPEDREAM LINK DOWN: {res.status_code}")
             except Exception as e:
-                st.error(f"NEURAL LINK FAILURE: {e}")
+                st.error(f"NEURAL CONNECTION FAILURE: {e}")
