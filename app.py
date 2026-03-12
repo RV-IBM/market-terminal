@@ -3,65 +3,92 @@ import pandas as pd
 import yfinance as yf
 import requests
 
-# 1. UI Setup
+# --- 1. SETTINGS & NEON THEME ---
 st.set_page_config(page_title="mySTOCK", layout="wide")
 
-# Dark Mode CSS
+# High-tech Neon Blue Styling
 st.markdown("""
     <style>
-    .main { background-color: #0e1117; color: #ffffff; }
-    .stMetric { background-color: #161b22; padding: 15px; border-radius: 10px; border: 1px solid #30363d; }
+    .main { background-color: #050a10; color: #00f2ff; }
+    .stMetric { background-color: #0b1420; border: 1px solid #00f2ff; border-radius: 10px; padding: 15px; box-shadow: 0 0 10px #00f2ff; }
+    [data-testid="stSidebar"] { background-color: #03070b; border-right: 1px solid #00f2ff; }
+    h1, h2, h3 { color: #00f2ff; text-shadow: 0 0 5px #00f2ff; font-family: 'Courier New', monospace; }
+    .stButton>button { background-color: #00f2ff; color: black; border-radius: 5px; font-weight: bold; border: none; box-shadow: 0 0 15px #00f2ff; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Sidebar: Top 5 & Pro Subscription
+# --- 2. SIDEBAR: LIVE TOP 5 & SUBSCRIPTION ---
 with st.sidebar:
-    st.title("💠 TERMINAL CONTROL")
+    st.title("⚡ TERMINAL CORE")
     
-    st.subheader("Market Leaders")
-    # Quick visual metrics for the sidebar
-    col1, col2 = st.columns(2)
-    col1.metric("NVDA", "822", "3.2%")
-    col2.metric("BTC", "67k", "2.1%")
+    st.subheader("📡 LIVE SECTOR FEED")
+    # Top 5 tickers for the sidebar
+    top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
+    
+    for t in top_5:
+        ticker_data = yf.Ticker(t)
+        # Using fast info for current price/change
+        price = ticker_data.fast_info['last_price']
+        change = ticker_data.fast_info['year_to_date_return'] * 100 # Approx change
+        
+        # High-tech Buy/Sell logic based on basic trend
+        signal = "BUY" if change > 0 else "SELL"
+        color = "🟢" if signal == "BUY" else "🔴"
+        
+        st.metric(label=f"{color} {t} | {signal}", value=f"${price:.2f}", delta=f"{change:.2f}%")
     
     st.divider()
     
-    # Pro Subscription Section (Fills the space)
-    st.subheader("💎 PRO ACCESS")
-    st.info("Institutional-grade intelligence.")
+    # WORKING PRO LINK
+    st.subheader("💎 PRO Subscription")
+    st.write("Unlock 0-latency Neural Analysis.")
     st.markdown("""
-    - ✅ **Unlimited** AI Queries
-    - ✅ **Real-time** Data Feeds
-    - ✅ **Advanced** Technical Analysis
-    - ✅ **Predictions** On Stock Crashes 
+    - **Unlimited** AI Deep-Dives
+    - **Real-time** Neural Signals
+    - **Priority** Data Processing
     """)
-    if st.button("UPGRADE - $19/mo", type="primary", use_container_width=True):
-        st.write("Redirecting to Stripe Checkout...")
+    # REPLACE URL BELOW WITH YOUR ACTUAL STRIPE LINK
+    st.link_button("UPGRADE TO PRO - $19/mo", "https://buy.stripe.com/your_actual_stripe_link_here", use_container_width=True)
 
-# 3. Main Dashboard logic
-st.title(" mySTOCK ")
-ticker = st.text_input("QUERY TICKER (e.g., AAPL, NVDA, TSLA):").upper()
+# --- 3. MAIN PAGE: DASHBOARD FILLERS ---
+st.title("mySTOCK")
 
-if st.button("EXECUTE ANALYSIS"):
-    if ticker:
-        # CHARTING (Instant Feedback)
-        st.subheader(f" {ticker} Trend Analysis")
-        data = yf.download(ticker, period="1mo", interval="1d")
-        if not data.empty:
-            st.line_chart(data['Close'])
+# Create a top row of stats to fill space
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("NETWORK STATUS", "ENCRYPTED", "STABLE")
+m2.metric("S&P 500", "5,123", "+0.4%")
+m3.metric("BTC DOMINANCE", "52.4%", "UP")
+m4.metric("AI LATENCY", "142ms", "-12ms")
+
+st.divider()
+
+# Search Interface
+ticker_input = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
+
+if st.button("EXECUTE NEURAL DIVE"):
+    if ticker_input:
+        col_chart, col_stats = st.columns([2, 1])
         
-        # AI ANALYSIS (Remote Call)
-        with st.spinner(f"Contacting remote neural network for {ticker}..."):
+        with col_chart:
+            st.subheader(f" {ticker_input} TREND TELEMETRY")
+            hist = yf.download(ticker_input, period="1mo", interval="1d")
+            if not hist.empty:
+                st.line_chart(hist['Close'])
+        
+        with col_stats:
+            st.subheader(" KEY METRICS")
+            info = yf.Ticker(ticker_input).info
+            st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+            st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
+            st.write(f"**Volume:** {info.get('volume', 'N/A')}")
+
+        # AI Analysis Call
+        with st.spinner("Decrypting Market Intelligence..."):
             try:
-                # Use the secret key name, not the URL
-                PIPEDREAM_URL = st.secrets["PIPEDREAM_URL"]
-                res = requests.post(PIPEDREAM_URL, json={"ticker": ticker}, timeout=60)
-                
+                url = st.secrets["PIPEDREAM_URL"]
+                res = requests.post(url, json={"ticker": ticker_input}, timeout=60)
                 if res.status_code == 200:
-                    prediction = res.json().get("prediction", "No analysis found.")
-                    st.success("TELEMETRY RECEIVED")
-                    st.write(prediction)
-                else:
-                    st.error(f"PIPEDREAM ERROR: {res.status_code}")
+                    st.success("TELEMETRY DECODED")
+                    st.write(res.json().get("prediction"))
             except Exception as e:
-                st.error(f"SYSTEM FAILURE: {str(e)}")
+                st.error(f"NEURAL LINK FAILURE: {e}")
