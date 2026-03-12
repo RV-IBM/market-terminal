@@ -21,7 +21,7 @@ with st.sidebar:
     st.subheader("Market Leaders")
     # Quick visual metrics for the sidebar
     col1, col2 = st.columns(2)
-    col1.metric("NVDA", "822.79", "3.2%")
+    col1.metric("NVDA", "822", "3.2%")
     col2.metric("BTC", "67k", "2.1%")
     
     st.divider()
