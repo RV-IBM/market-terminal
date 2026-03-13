@@ -26,17 +26,23 @@ with st.sidebar:
     
     top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
     
-    for t in top_5:
-        # Fast info gives us quick access to prices without heavy loading
-        s = yf.Ticker(t)
-        price = s.fast_info['last_price']
-        change = s.fast_info['year_to_date_return'] * 100
-        
-        # High-tech buy/sell signaling
-        signal = "BUY" if change > 0 else "SELL"
-        color = "🟢" if signal == "BUY" else "🔴"
-        
-        st.metric(label=f"{color} {t} | {signal}", value=f"${price:.2f}", delta=f"{change:.2f}%")
+   for t in top_5:
+        try:
+            stock = yf.Ticker(t)
+            # Fetch essential data points
+            price = stock.fast_info['last_price']
+            prev_close = stock.fast_info['previous_close']
+            
+            # Manually calculate percentage change
+            daily_change_pct = ((price - prev_close) / prev_close) * 100
+            
+            # High-tech signal logic
+            signal = "BUY" if daily_change_pct > 0 else "SELL"
+            icon = "🟢" if signal == "BUY" else "🔴"
+            
+            st.metric(label=f"{icon} {t} | {signal}", value=f"${price:.2f}", delta=f"{daily_change_pct:.2f}%")
+        except Exception as e:
+            st.sidebar.error(f"Feed error on {t}")
     
     st.divider()
     
