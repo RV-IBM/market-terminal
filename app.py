@@ -45,13 +45,13 @@ with st.sidebar:
             st.sidebar.error(f"Feed error on {t}")
     
     # WORKING PRO LINK
-st.subheader("💎 PRO Subscription")
-st.write("Unlock 0-latency Neural Analysis.")
-st.markdown("""
-- **Unlimited** AI Deep-Dives
-- **Real-time** Neural Signals
-- **Priority** Data Processing
-""")
+    st.subheader("💎 PRO Subscription")
+    st.write("Unlock 0-latency Neural Analysis.")
+    st.markdown("""
+    - **Unlimited** AI Deep-Dives
+    - **Real-time** Neural Signals
+    - **Priority** Data Processing
+    """)
     # REPLACE URL BELOW WITH YOUR ACTUAL STRIPE LINK
 st.link_button("UPGRADE TO PRO - $19/mo", "https://buy.stripe.com/your_actual_stripe_link_here", use_container_width=True)
 
