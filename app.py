@@ -73,7 +73,8 @@ ticker = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 if st.button("EXECUTE NEURAL DIVE"):
     if ticker:
         payload = {"ticker": ticker}
-        res = requests.post(PIPEDREAM_URL, json=payload, timeout=60)
+        url = st.secrets["PIPEDREAM_URL"]
+        res = requests.post(url, json=payload, timeout=60)
         col_chart, col_stats = st.columns([2, 1])
         
         with col_chart:
