@@ -19,29 +19,25 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 2. SIDEBAR: LIVE TOP 5 & SUBSCRIPTION ---
+# OVERWRITE THIS SECTION IN YOUR app.py
 with st.sidebar:
     st.title("TERMINAL CORE")
-    st.subheader("LIVE FEED: TOP 5")
+    st.subheader("LIVE SECTOR FEED")
     
-    # Live Tickers
-    top_tickers = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
+    top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
     
-    for t in top_tickers:
-        try:
-            # Fetching live data via Ticker object
-            stock = yf.Ticker(t)
-            price = stock.fast_info['last_price']
-            # Calculate daily change %
-            prev_close = stock.fast_info['previous_close']
-            daily_change = ((price - prev_close) / prev_close) * 100
-        # Buy/Sell signal logic based on 24h trend
-            signal = "BUY" if daily_change > 0 else "SELL"
-            icon = "🟢" if signal == "BUY" else "🔴"
-            
-            st.metric(label=f"{icon} {t} | {signal}", value=f"${price:.2f}", delta=f"{daily_change:.2f}%")
-        except:
-            st.sidebar.error(f"Feed error on {t}")
-            
+    for t in top_5:
+        # Fast info gives us quick access to prices without heavy loading
+        s = yf.Ticker(t)
+        price = s.fast_info['last_price']
+        change = s.fast_info['year_to_date_return'] * 100
+        
+        # High-tech buy/sell signaling
+        signal = "BUY" if change > 0 else "SELL"
+        color = "🟢" if signal == "BUY" else "🔴"
+        
+        st.metric(label=f"{color} {t} | {signal}", value=f"${price:.2f}", delta=f"{change:.2f}%")
+    
     st.divider()
     
     # WORKING PRO LINK
