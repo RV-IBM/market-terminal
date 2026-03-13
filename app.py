@@ -70,8 +70,6 @@ st.divider()
 # Search Interface
 ticker_input = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 # In app.py
-payload = {"ticker": ticker_input}
-res = requests.post(PIPEDREAM_URL, json=payload, timeout=60)
 if st.button("EXECUTE NEURAL DIVE"):
     if ticker_input:
         col_chart, col_stats = st.columns([2, 1])
@@ -92,12 +90,11 @@ if st.button("EXECUTE NEURAL DIVE"):
      # AI Analysis Call (Pipedream)
         with st.spinner("Decrypting Neural Data..."):
             try:
-                url = st.secrets["PIPEDREAM_URL"]
-                res = requests.post(url, json={"ticker": ticker_input}, timeout=60)
+               url = st.secrets["PIPEDREAM_URL"] 
+                res = requests.post(url, json={"ticker": ticker}, timeout=60)
                 if res.status_code == 200:
-                    st.success("DECODING SUCCESS")
-                    st.write(res.json().get("prediction", "No analysis found."))
+                    st.write(res.json().get("prediction", "No analysis."))
                 else:
-                    st.error(f"PIPEDREAM LINK DOWN: {res.status_code}")
+                    st.error(f"Pipedream returned {res.status_code}")
             except Exception as e:
-                st.error(f"NEURAL CONNECTION FAILURE: {e}")
+                st.error(f"Connection error: {e}")
