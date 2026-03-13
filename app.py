@@ -71,7 +71,7 @@ st.divider()
 ticker = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 # In app.py
 if st.button("EXECUTE NEURAL DIVE"):
-    if ticker_input:
+    if ticker:
         payload = {"ticker": ticker}
         res = requests.post(PIPEDREAM_URL, json=payload, timeout=60)
         col_chart, col_stats = st.columns([2, 1])
