@@ -22,27 +22,16 @@ st.markdown("""
 # OVERWRITE THIS SECTION IN YOUR app.py
 with st.sidebar:
     st.title("TERMINAL CORE")
-    st.subheader("LIVE SECTOR FEED")
-    
-    top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
-    
-    for t in top_5:
+    for t in ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]:
         try:
-            stock = yf.Ticker(t)
-            # Fetch essential data points
-            price = stock.fast_info['last_price']
-            prev_close = stock.fast_info['previous_close']
-            
-            # Manually calculate percentage change
-            daily_change_pct = ((price - prev_close) / prev_close) * 100
-            
-            # High-tech signal logic
-            signal = "BUY" if daily_change_pct > 0 else "SELL"
-            icon = "🟢" if signal == "BUY" else "🔴"
-            
-            st.metric(label=f"{icon} {t} | {signal}", value=f"${price:.2f}", delta=f"{daily_change_pct:.2f}%")
+            s = yf.Ticker(t)
+            price = s.fast_info['last_price']
+            prev = s.fast_info['previous_close']
+            # Calculate change manually
+            delta = ((price - prev) / prev) * 100
+            st.metric(t, f"${price:.2f}", f"{delta:.2f}%")
         except Exception as e:
-            st.sidebar.error(f"Feed error on {t}")
+            st.error(f"Error on {t}")
     
     # WORKING PRO LINK
     st.subheader("💎 PRO Subscription")
@@ -71,10 +60,16 @@ st.divider()
 ticker = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 # In app.py
 if st.button("EXECUTE NEURAL DIVE"):
-    if ticker:
-        payload = {"ticker": ticker}
-        url = st.secrets["PIPEDREAM_URL"]
-        res = requests.post(url, json=payload, timeout=60)
+    if ticker_input:
+        # Use st.secrets, NOT a raw variable
+        url = st.secrets["PIPEDREAM_URL"] 
+        payload = {"ticker": ticker_input}
+        try:
+            res = requests.post(url, json=payload, timeout=60)
+            if res.status_code == 200:
+                st.write(res.json().get("prediction"))
+        except requests.exceptions.ReadTimeout:
+            st.error("AI Analysis timed out. Pipedream is taking too long.")
         col_chart, col_stats = st.columns([2, 1])
         
         with col_chart:
