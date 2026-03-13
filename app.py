@@ -26,7 +26,7 @@ with st.sidebar:
     
     top_5 = ["NVDA", "TSLA", "AAPL", "BTC-USD", "AMD"]
     
-for t in top_5:
+    for t in top_5:
         try:
             stock = yf.Ticker(t)
             # Fetch essential data points
