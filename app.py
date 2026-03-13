@@ -44,8 +44,6 @@ for t in top_5:
         except Exception as e:
             st.sidebar.error(f"Feed error on {t}")
     
-    st.divider()
-    
     # WORKING PRO LINK
     st.subheader("💎 PRO Subscription")
     st.write("Unlock 0-latency Neural Analysis.")
