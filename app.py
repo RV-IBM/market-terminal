@@ -91,10 +91,10 @@ if st.button("EXECUTE NEURAL DIVE"):
         with st.spinner("Decrypting Neural Data..."):
             try:
                url = st.secrets["PIPEDREAM_URL"] 
-                res = requests.post(url, json={"ticker": ticker}, timeout=60)
-                if res.status_code == 200:
+               res = requests.post(url, json={"ticker": ticker}, timeout=60)
+               if res.status_code == 200:
                     st.write(res.json().get("prediction", "No analysis."))
-                else:
+               else:
                     st.error(f"Pipedream returned {res.status_code}")
             except Exception as e:
                 st.error(f"Connection error: {e}")
