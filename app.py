@@ -68,10 +68,12 @@ m4.metric("SYSTEM LATENCY", "142ms", "-12ms")
 st.divider()
 
 # Search Interface
-ticker_input = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
+ticker = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 # In app.py
 if st.button("EXECUTE NEURAL DIVE"):
     if ticker_input:
+        payload = {"ticker": ticker}
+        res = requests.post(PIPEDREAM_URL, json=payload, timeout=60)
         col_chart, col_stats = st.columns([2, 1])
         
         with col_chart:
