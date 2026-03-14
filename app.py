@@ -57,7 +57,7 @@ m4.metric("SYSTEM LATENCY", "142ms", "-12ms")
 st.divider()
 
 # Search Interface
-ticker = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
+ticker_input = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
 # In app.py
 if st.button("EXECUTE NEURAL DIVE"):
     if ticker_input:
