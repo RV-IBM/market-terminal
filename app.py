@@ -57,19 +57,35 @@ m4.metric("SYSTEM LATENCY", "142ms", "-12ms")
 st.divider()
 
 # Search Interface
-ticker_input = st.text_input("INPUT STOCK (e.g., AAPL):").upper()
-# In app.py
+ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA):").upper()
+
 if st.button("EXECUTE NEURAL DIVE"):
-    if ticker_input:
-        # Use st.secrets, NOT a raw variable
-        url = st.secrets["PIPEDREAM_URL"] 
-        payload = {"ticker": ticker_input}
-        try:
-            res = requests.post(url, json=payload, timeout=60)
-            if res.status_code == 200:
-                st.write(res.json().get("prediction"))
-        except requests.exceptions.ReadTimeout:
-            st.error("AI Analysis timed out. Pipedream is taking too long.")
+    if ticker: # Ensures 'ticker' is defined and not empty
+        # Charting
+        st.subheader(f" {ticker} TREND TELEMETRY")
+        hist = yf.download(ticker, period="1mo", interval="1d")
+        if not hist.empty:
+            st.line_chart(hist['Close'])
+        
+        # AI Analysis Call
+        with st.spinner("Decrypting Neural Data..."):
+            try:
+                # Access URL from Secrets
+                url = st.secrets["PIPEDREAM_URL"]
+                payload = {"ticker": ticker}
+                
+                # Higher timeout to prevent ReadTimeout
+                res = requests.post(url, json=payload, timeout=60)
+                
+                if res.status_code == 200:
+                    st.success("TELEMETRY DECODED")
+                    st.write(res.json().get("prediction", "No data returned."))
+                else:
+                    st.error(f"SERVER ERROR: {res.status_code}")
+            except Exception as e:
+                st.error(f"NEURAL LINK FAILURE: {str(e)}")
+    else:
+        st.warning("PLEASE ENTER A TICKER SYMBOL.")
         col_chart, col_stats = st.columns([2, 1])
         
         with col_chart:
@@ -85,14 +101,4 @@ if st.button("EXECUTE NEURAL DIVE"):
             st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
             st.write(f"**Volume:** {info.get('volume', 'N/A')}")
 
-     # AI Analysis Call (Pipedream)
-        with st.spinner("Decrypting Neural Data..."):
-            try:
-               url = st.secrets["PIPEDREAM_URL"] 
-               res = requests.post(url, json={"ticker": ticker}, timeout=60)
-               if res.status_code == 200:
-                    st.write(res.json().get("prediction", "No analysis."))
-               else:
-                    st.error(f"Pipedream returned {res.status_code}")
-            except Exception as e:
-                st.error(f"Connection error: {e}")
+    
