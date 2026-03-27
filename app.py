@@ -4,7 +4,7 @@ import yfinance as yf
 import requests
 
 # --- 1. SETTINGS & NEON THEME ---
-st.set_page_config(page_title="mySTOCK", layout="wide")
+st.set_page_config(page_title="Flux Equity", layout="wide")
 
 # Neon Blue & Dark Slate Styling
 st.markdown("""
