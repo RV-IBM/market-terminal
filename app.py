@@ -45,7 +45,7 @@ with st.sidebar:
     st.link_button("UPGRADE TO PRO - $19/mo", "https://buy.stripe.com/your_actual_stripe_link_here", use_container_width=True)
 
 # --- 3. MAIN PAGE: DASHBOARD FILLERS ---
-st.title("mySTOCK")
+st.title("Flux Equity")
 st.link_button("UPGRADE TO PRO - $19/mo", "https://buy.stripe.com/your_actual_stripe_link_here", use_container_width=True)
 # Create a top row of stats to fill space
 m1, m2, m3, m4 = st.columns(4)
