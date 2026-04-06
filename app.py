@@ -79,26 +79,28 @@ if st.button("EXECUTE NEURAL DIVE"):
                 
                 if res.status_code == 200:
                     st.success("TELEMETRY DECODED")
-                    st.write(res.json().get("prediction", "No data returned."))
+                    # Render the AI report properly
+                    with st.container(border=True):
+                        st.markdown(res.json().get("prediction", "No data returned."))
                 else:
                     st.error(f"SERVER ERROR: {res.status_code}")
             except Exception as e:
                 st.error(f"NEURAL LINK FAILURE: {str(e)}")
-    else:
-        st.warning("PLEASE ENTER A TICKER SYMBOL.")
-        col_chart, col_stats = st.columns([2, 1])
         
+        # Display Charts and Metrics below the AI Analysis
+        col_chart, col_stats = st.columns([2, 1])
+
         with col_chart:
-            st.subheader(f" {ticker_input} TREND TELEMETRY")
-            hist = yf.download(ticker_input, period="1mo", interval="1d")
+            st.subheader(f"📊 {ticker} TREND TELEMETRY")
+            hist = yf.download(ticker, period="1mo", interval="1d")
             if not hist.empty:
                 st.line_chart(hist['Close'])
-        
+
         with col_stats:
-            st.subheader(" KEY METRICS")
-            info = yf.Ticker(ticker_input).info
+            st.subheader("📑 KEY METRICS")
+            info = yf.Ticker(ticker).info
             st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
             st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
             st.write(f"**Volume:** {info.get('volume', 'N/A')}")
-
-    
+    else:
+        st.warning("PLEASE ENTER A TICKER SYMBOL.")
