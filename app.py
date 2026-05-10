@@ -91,4 +91,4 @@ ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA):").upper()
                 st.write(f"**Volume:** {info.get('volume', 'N/A')}")
                 
         except Exception as e:
-            st.error(f"NEURAL LINK FAILURE: {str(e)}"))
+            st.error(f"NEURAL LINK FAILURE: {str(e)}")
