@@ -74,8 +74,7 @@ if st.button("EXECUTE NEURAL DIVE"):
                 if res.status_code == 200:
                     st.success("TELEMETRY DECODED")
                     st.markdown(res.json().get("prediction", "No data returned."))
-# Search Interface
-ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA):").upper()
+
 
         
         col_chart, col_stats = st.columns([2, 1])
