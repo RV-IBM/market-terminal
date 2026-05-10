@@ -77,7 +77,7 @@ if st.button("EXECUTE NEURAL DIVE"):
 
 
         
-        col_chart, col_stats = st.columns([2, 1])
+            col_chart, col_stats = st.columns([2, 1])
             with col_chart:
                 st.subheader(f"📊 {ticker} TREND")
                 st.line_chart(hist['Close'])
