@@ -3,6 +3,11 @@ import pandas as pd
 import yfinance as yf
 import requests
 
+@st.cache_data(ttl=3600)
+def get_stock_data(symbol):
+    stock = yf.Ticker(symbol)
+    return stock.info, stock.history(period="1mo")
+
 # --- 1. SETTINGS & NEON THEME ---
 st.set_page_config(page_title="SOAR Markets", layout="wide")
 
@@ -56,51 +61,34 @@ m4.metric("SYSTEM LATENCY", "142ms", "-12ms")
 
 st.divider()
 
+if st.button("EXECUTE NEURAL DIVE"):
+    if ticker: # Ensure this matches your text_input variable name
+        try:
+            # Fetch data using the cache
+            info, hist = get_stock_data(ticker)
+            
+            # AI Analysis Section
+            with st.spinner("Decrypting Neural Data..."):
+                url = st.secrets["PIPEDREAM_URL"]
+                res = requests.post(url, json={"ticker": ticker}, timeout=60)
+                if res.status_code == 200:
+                    st.success("TELEMETRY DECODED")
+                    st.markdown(res.json().get("prediction", "No data returned."))
 # Search Interface
 ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA):").upper()
 
-if st.button("EXECUTE NEURAL DIVE"):
-    if ticker: # Ensures 'ticker' is defined and not empty
-        # Charting
-        st.subheader(f" {ticker} TREND TELEMETRY")
-        hist = yf.download(ticker, period="1mo", interval="1d")
-        if not hist.empty:
-            st.line_chart(hist['Close'])
         
-        # AI Analysis Call
-        with st.spinner("Decrypting Neural Data..."):
-            try:
-                # Access URL from Secrets
-                url = st.secrets["PIPEDREAM_URL"]
-                payload = {"ticker": ticker}
-                
-                # Higher timeout to prevent ReadTimeout
-                res = requests.post(url, json=payload, timeout=60)
-                
-                if res.status_code == 200:
-                    st.success("TELEMETRY DECODED")
-                    # Render the AI report properly
-                    with st.container(border=True):
-                        st.markdown(res.json().get("prediction", "No data returned."))
-                else:
-                    st.error(f"SERVER ERROR: {res.status_code}")
-            except Exception as e:
-                st.error(f"NEURAL LINK FAILURE: {str(e)}")
-        
-        # Display Charts and Metrics below the AI Analysis
         col_chart, col_stats = st.columns([2, 1])
-
-        with col_chart:
-            st.subheader(f"📊 {ticker} TREND TELEMETRY")
-            hist = yf.download(ticker, period="1mo", interval="1d")
-            if not hist.empty:
+            with col_chart:
+                st.subheader(f"📊 {ticker} TREND")
                 st.line_chart(hist['Close'])
 
-        with col_stats:
-            st.subheader("📑 KEY METRICS")
-            info = yf.Ticker(ticker).info
-            st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
-            st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
-            st.write(f"**Volume:** {info.get('volume', 'N/A')}")
-    else:
-        st.warning("PLEASE ENTER A TICKER SYMBOL.")
+            with col_stats:
+                st.subheader("📑 KEY METRICS")
+                # Safety checks for metrics
+                st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+                st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
+                st.write(f"**Volume:** {info.get('volume', 'N/A')}")
+                
+        except Exception as e:
+            st.error(f"NEURAL LINK FAILURE: {str(e)}"))
