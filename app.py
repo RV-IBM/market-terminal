@@ -22,15 +22,71 @@ def get_stock_data(symbol):
     stock = yf.Ticker(symbol)
     return stock.info, stock.history(period="1mo")
 
-# 3. Sidebar: Terminal Status
+# 1. Define a larger pool of potential stocks to watch
+CANDIDATE_POOL = [
+    "NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", 
+    "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"
+]
+
+@st.cache_data(ttl=600)
+def get_dynamic_leaderboard(tickers):
+    leaderboard = []
+    
+    # Download data for the entire pool at once (faster than one-by-one)
+    data = yf.download(tickers, period="2d", interval="1d", group_by='ticker', progress=False)
+    
+    for t in tickers:
+        try:
+            # Get the last two closing prices
+            hist = data[t]
+            if len(hist) >= 2:
+                current = hist['Close'].iloc[-1]
+                prev = hist['Close'].iloc[-2]
+                delta = ((current - prev) / prev) * 100
+                leaderboard.append({"ticker": t, "price": current, "delta": delta})
+        except:
+            continue
+            
+    # SORTING LOGIC: Sort by 'delta' (percentage change) from highest to lowest
+    sorted_list = sorted(leaderboard, key=lambda x: x['delta'], reverse=True)
+    
+    # Return only the Top 5 performers
+    return sorted_list[:5]
+
+# 2. Updated Sidebar Section
 with st.sidebar:
-    st.title("SOAR MARKETS")
-    st.subheader("📡 SYSTEM STATUS")
-    st.success("QUANT LINK: ACTIVE")
-    st.info("CACHE: ENABLED")
+    st.title("⚡ TERMINAL CORE")
+    
+    st.subheader("🏆 TOP PERFORMERS (24H)")
+    
+    # Run the dynamic sorting
+    top_5 = get_dynamic_leaderboard(CANDIDATE_POOL)
+    
+    for item in top_5:
+        st.metric(
+            label=item["ticker"], 
+            value=f"${item['price']:.2f}", 
+            delta=f"{item['delta']:.2f}%"
+        )
+
     st.divider()
-    st.subheader("💎 PRO FEATURES")
-    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
+    # ... rest of your sidebar (Clearance level, Stripe button)
+
+    # --- PRO UPGRADE SECTION ---
+    st.markdown("""
+    ### **LEVEL 2 CLEARANCE**
+    * **Unlimited Neural Dives**
+    * **30-Day Intelligence Briefings**
+    * **Institutional Data Stream**
+    
+    *Gain the edge the machines have.*
+    """)
+    
+    # Add your Stripe URL here
+    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_test_link", use_container_width=True)
+    
+    st.divider()
+    st.caption("SYSTEM STATUS: ENCRYPTED")
 
 # 4. Main UI - Input Step
 st.title("SOAR MARKETS")
