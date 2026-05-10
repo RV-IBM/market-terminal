@@ -4,91 +4,72 @@ import yfinance as yf
 import requests
 import ast
 
-# 1. Page Configuration & Advanced Hexagonal Styling
+# 1. Page Configuration & Ultra-Sleek Hexagonal Styling
 st.set_page_config(page_title="SOAR MARKETS", layout="wide")
 
 st.markdown("""
     <style>
-    /* Hexagonal Background Pattern */
+    /* 1. REGULAR HEXAGONAL BACKGROUND (Pure Black Fill, Glowing Lines) */
     [data-testid="stAppViewContainer"] {
-        background-color: #02060a;
-        background-image:
-            radial-gradient(circle at center, rgba(0, 242, 255, 0.05) 0%, transparent 80%),
-            url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+        background-color: #000000;
+        /* Perfect Hexagonal Grid via SVG */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%2300f2ff' stroke-width='0.5' opacity='0.2'/%3E%3C/svg%3E");
         background-attachment: fixed;
+        color: #ffffff;
     }
 
-    /* Hexagonal Grid Overlay */
-    [data-testid="stAppViewContainer"]::before {
-        content: "";
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: 
-            linear-gradient(30deg, #02060a 12%, transparent 12.5%, transparent 87%, #02060a 87.5%, #02060a),
-            linear-gradient(-30deg, #02060a 12%, transparent 12.5%, transparent 87%, #02060a 87.5%, #02060a),
-            linear-gradient(30deg, #02060a 12%, transparent 12.5%, transparent 87%, #02060a 87.5%, #02060a),
-            linear-gradient(-30deg, #02060a 12%, transparent 12.5%, transparent 87%, #02060a 87.5%, #02060a),
-            linear-gradient(60deg, rgba(0, 242, 255, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(0, 242, 255, 0.02) 75%, rgba(0, 242, 255, 0.02)),
-            linear-gradient(60deg, rgba(0, 242, 255, 0.02) 25%, transparent 25.5%, transparent 75%, rgba(0, 242, 255, 0.02) 75%, rgba(0, 242, 255, 0.02));
-        background-size: 80px 140px;
-        pointer-events: none;
-        z-index: 0;
-    }
-
-    /* Sidebar Styling */
+    /* 2. SIDEBAR STYLING */
     [data-testid="stSidebar"] { 
         background-color: #010408; 
         border-right: 2px solid #00f2ff;
-        box-shadow: 5px 0 15px rgba(0, 242, 255, 0.1);
+        box-shadow: 5px 0 15px rgba(0, 242, 255, 0.2);
     }
 
-    /* Glowing Titles */
+    /* 3. GLOWING CYAN TITLES */
     h1, h2, h3 { 
         color: #00f2ff; 
-        text-shadow: 0 0 15px rgba(0, 242, 255, 0.8); 
+        text-shadow: 0 0 10px rgba(0, 242, 255, 0.6); 
         font-family: 'Courier New', monospace; 
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 3px;
     }
 
-    /* Interactive Metric Boxes with Gradient Edges */
+    /* 4. INTERACTIVE METRIC BOXES (Original Cyan Hover) */
     .stMetric { 
-        background: rgba(11, 20, 32, 0.9) !important;
-        border: 1px solid rgba(0, 242, 255, 0.2) !important;
-        border-radius: 8px !important;
+        background: rgba(0, 0, 0, 0.85) !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border-radius: 4px !important;
         padding: 20px !important;
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transition: all 0.3s ease;
     }
     .stMetric:hover {
         border: 1px solid #00f2ff !important;
-        box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
-        transform: translateY(-5px);
-        background: linear-gradient(145deg, rgba(11, 20, 32, 1), rgba(0, 242, 255, 0.05)) !important;
+        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5);
+        transform: scale(1.02);
     }
 
-    /* Synchronized Blue Glow Buttons */
+    /* 5. SYNCED BLUE-CYAN GRADIENT BUTTONS */
     .stButton>button, [data-testid="stLinkButton"]>a { 
-        background: linear-gradient(90deg, #00f2ff, #0072ff) !important; 
+        background: linear-gradient(135deg, #00f2ff 0%, #0072ff 100%) !important; 
         color: #000000 !important; 
-        font-weight: 900 !important; 
+        font-weight: 800 !important; 
         width: 100% !important; 
         border: none !important; 
-        border-radius: 4px !important;
-        box-shadow: 0 0 15px rgba(0, 242, 255, 0.5) !important;
+        border-radius: 2px !important;
+        box-shadow: 0 0 10px rgba(0, 242, 255, 0.4) !important;
         text-decoration: none !important;
         text-align: center !important;
         display: inline-block !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.2s ease !important;
     }
     .stButton>button:hover, [data-testid="stLinkButton"]>a:hover {
         filter: brightness(1.2);
-        box-shadow: 0 0 25px rgba(0, 242, 255, 0.8) !important;
-        transform: scale(1.02);
+        box-shadow: 0 0 20px rgba(0, 242, 255, 0.7) !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Data Caching with Multi-Key Extraction (Fixes N/A Metrics)
+# 2. Functional Data Logic (Untouched/Robust)
 @st.cache_data(ttl=3600)
 def get_stock_data(symbol):
     stock = yf.Ticker(symbol)
@@ -101,7 +82,6 @@ def get_stock_data(symbol):
     except:
         fast_info = {}
 
-    # Comprehensive dictionary search to find actual numbers
     info = {
         "marketCap": raw_info.get("marketCap") or fast_info.get("marketCap") or "N/A",
         "volume": raw_info.get("regularMarketVolume") or fast_info.get("lastVolume") or "N/A",
@@ -111,7 +91,6 @@ def get_stock_data(symbol):
     hist = stock.history(period="1mo")
     return info, hist
 
-# 3. Dynamic Leaderboard (Sorted by Change)
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "PLTR"]
 
 @st.cache_data(ttl=600)
@@ -131,29 +110,28 @@ def get_dynamic_leaderboard(tickers):
         return sorted(leaderboard, key=lambda x: x['delta'], reverse=True)[:5]
     except: return []
 
-# 4. Sidebar UI
+# 3. Sidebar
 with st.sidebar:
-    st.title("SOAR CORE")
-    st.subheader("TOP GAINERS")
+    st.title("⚡ SOAR CORE")
+    st.subheader("📡 TOP GAINERS")
     top_5 = get_dynamic_leaderboard(CANDIDATE_POOL)
     for item in top_5:
         st.metric(label=item["ticker"], value=f"${item['price']:.2f}", delta=f"{item['delta']:.2f}%")
 
     st.divider()
     st.markdown("### **LEVEL 2 CLEARANCE**\n* Unlimited Neural Dives\n* 30-Day Intelligence")
-    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_link", use_container_width=True)
+    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_link")
 
-# 5. Main UI
-st.title("SOAR MARKETS")
+# 4. Main Interface
+st.title("🚀 SOAR MARKETS")
 
-# Top-level Upgrade Button
+# Upgrade Button right under Title
 col_main, col_btn = st.columns([3, 1])
 with col_btn:
-    st.link_button("UPGRADE ACCESS ", "https://buy.stripe.com/your_link")
+    st.link_button("UPGRADE ACCESS ⚡", "https://buy.stripe.com/your_link")
 
-ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA):", placeholder="Enter Ticker...").upper()
+ticker = st.text_input("INPUT STOCK PROTOCOL:", placeholder="e.g. NVDA").upper()
 
-# 6. Execution Logic
 if st.button("EXECUTE NEURAL DIVE"):
     if ticker:
         try:
@@ -166,25 +144,21 @@ if st.button("EXECUTE NEURAL DIVE"):
                 if res.status_code == 200:
                     st.success("📡 NEURAL LINK ESTABLISHED")
                     with st.container(border=True):
-                        # Robust Decoder for AI dictionary
                         raw = res.json().get("prediction", "")
+                        # Decoder for AI Output
                         try:
                             if isinstance(raw, str) and "candidates" in raw:
                                 data = ast.literal_eval(raw)
                                 clean_text = data["candidates"][0]["content"]["parts"][0]["text"]
                             elif isinstance(raw, dict) and "candidates" in raw:
                                 clean_text = raw["candidates"][0]["content"]["parts"][0]["text"]
-                            else:
-                                clean_text = str(raw)
-                        except:
-                            clean_text = str(raw)
+                            else: clean_text = str(raw)
+                        except: clean_text = str(raw)
                         st.markdown(clean_text)
-                else:
-                    st.error("NEURAL LINK FAILURE")
+                else: st.error("NEURAL LINK FAILURE")
 
             st.divider()
             
-            # Visual Telemetry
             col_chart, col_stats = st.columns([2, 1])
             with col_chart:
                 st.subheader(f"📊 {ticker} TREND")
@@ -202,4 +176,4 @@ if st.button("EXECUTE NEURAL DIVE"):
                 st.write(f"**52W High:** {fmt(info['fiftyTwoWeekHigh'])}")
 
         except Exception as e:
-            st.error(f"CRITICAL ERROR: {str(e)}")
+            st.error(f"SYSTEM ERROR: {str(e)}")
