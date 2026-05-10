@@ -4,7 +4,7 @@ import yfinance as yf
 import requests
 
 # 1. Page Configuration & Custom Neon Theme
-st.set_page_config(page_title="ALPHA-TERMINAL", layout="wide")
+st.set_page_config(page_title="SOAR MARKETS", layout="wide")
 
 st.markdown("""
     <style>
@@ -20,9 +20,23 @@ st.markdown("""
 @st.cache_data(ttl=3600)
 def get_stock_data(symbol):
     stock = yf.Ticker(symbol)
-    return stock.info, stock.history(period="1mo")
+    
+    # We use fast_info here instead of .info to prevent the Too Many Requests error
+    try:
+        info = {
+            "marketCap": stock.fast_info.get("marketCap", "N/A"),
+            "volume": stock.fast_info.get("lastVolume", "N/A"),
+            "fiftyTwoWeekHigh": stock.fast_info.get("yearHigh", "N/A"),
+            # trailingPE isn't in fast_info, so we safely try to grab it from standard info
+            "trailingPE": stock.info.get("trailingPE", "N/A") if hasattr(stock, 'info') else "N/A"
+        }
+    except Exception:
+        info = {}
+        
+    hist = stock.history(period="1mo")
+    return info, hist
 
-# 1. Define a larger pool of potential stocks to watch
+# 3. Dynamic Leaderboard
 CANDIDATE_POOL = [
     "NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", 
     "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"
@@ -31,46 +45,47 @@ CANDIDATE_POOL = [
 @st.cache_data(ttl=600)
 def get_dynamic_leaderboard(tickers):
     leaderboard = []
-    
-    # Download data for the entire pool at once (faster than one-by-one)
-    data = yf.download(tickers, period="2d", interval="1d", group_by='ticker', progress=False)
-    
-    for t in tickers:
-        try:
-            # Get the last two closing prices
-            hist = data[t]
-            if len(hist) >= 2:
-                current = hist['Close'].iloc[-1]
-                prev = hist['Close'].iloc[-2]
-                delta = ((current - prev) / prev) * 100
-                leaderboard.append({"ticker": t, "price": current, "delta": delta})
-        except:
-            continue
-            
-    # SORTING LOGIC: Sort by 'delta' (percentage change) from highest to lowest
-    sorted_list = sorted(leaderboard, key=lambda x: x['delta'], reverse=True)
-    
-    # Return only the Top 5 performers
-    return sorted_list[:5]
+    try:
+        # Download data for the entire pool at once
+        data = yf.download(tickers, period="2d", interval="1d", group_by='ticker', progress=False)
+        
+        for t in tickers:
+            try:
+                hist = data[t]
+                if len(hist) >= 2:
+                    current = float(hist['Close'].iloc[-1])
+                    prev = float(hist['Close'].iloc[-2])
+                    delta = ((current - prev) / prev) * 100
+                    leaderboard.append({"ticker": t, "price": current, "delta": delta})
+            except Exception:
+                continue
+                
+        # Sort by 'delta' (percentage change) from highest to lowest
+        sorted_list = sorted(leaderboard, key=lambda x: x['delta'], reverse=True)
+        return sorted_list[:5]
+    except Exception:
+        # If rate limited, return an empty list instead of crashing
+        return []
 
-# 2. Updated Sidebar Section
+# 4. Sidebar UI
 with st.sidebar:
-    st.title("⚡ TERMINAL CORE")
+    st.title("SOAR MARKETS")
     
-    st.subheader("🏆 TOP PERFORMERS (24H)")
+    st.subheader("TOP PERFORMERS (24H)")
     
-    # Run the dynamic sorting
     top_5 = get_dynamic_leaderboard(CANDIDATE_POOL)
     
-    for item in top_5:
-        st.metric(
-            label=item["ticker"], 
-            value=f"${item['price']:.2f}", 
-            delta=f"{item['delta']:.2f}%"
-        )
+    if not top_5:
+        st.warning("RATE LIMIT ACTIVE. Live feed paused to protect system.")
+    else:
+        for item in top_5:
+            st.metric(
+                label=item["ticker"], 
+                value=f"${item['price']:.2f}", 
+                delta=f"{item['delta']:.2f}%"
+            )
 
     st.divider()
-    # ... rest of your sidebar (Clearance level, Stripe button)
 
     # --- PRO UPGRADE SECTION ---
     st.markdown("""
@@ -83,20 +98,20 @@ with st.sidebar:
     """)
     
     # Add your Stripe URL here
-    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_test_link", use_container_width=True)
+    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
     
     st.divider()
     st.caption("SYSTEM STATUS: ENCRYPTED")
 
-# 4. Main UI - Input Step
-st.title("SOAR MARKETS")
+# 5. Main UI
+st.title("SOAR MARKETS SYSTEM")
 
-# THE INPUT STEP (The one you accidentally deleted)
+# THE MISSING INPUT RESTORED
 ticker = st.text_input("INPUT STOCK PROTOCOL (e.g., NVDA, TSLA, AAPL):", placeholder="Enter Ticker...").upper()
 
-# 5. Execution Logic
+# 6. Execution Logic
 if st.button("EXECUTE NEURAL DIVE"):
-    if ticker:
+    if ticker: # Ensures ticker exists
         try:
             # Step A: Fetch Market Data via Cache
             info, hist = get_stock_data(ticker)
@@ -107,9 +122,8 @@ if st.button("EXECUTE NEURAL DIVE"):
                 res = requests.post(url, json={"ticker": ticker}, timeout=60)
                 
                 if res.status_code == 200:
-                    st.success("NEURAL LINK ESTABLISHED")
+                    st.success("📡 NEURAL LINK ESTABLISHED")
                     with st.container(border=True):
-                        # Extracts the prediction text from the JSON response
                         prediction = res.json().get("prediction", "No telemetry data.")
                         st.markdown(prediction)
                 else:
@@ -127,10 +141,21 @@ if st.button("EXECUTE NEURAL DIVE"):
 
             with col_stats:
                 st.subheader("📑 KEY METRICS")
-                st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+                
+                # Format numbers cleanly
+                m_cap = info.get('marketCap', 'N/A')
+                vol = info.get('volume', 'N/A')
+                
+                if isinstance(m_cap, (int, float)): m_cap = f"${m_cap:,.0f}"
+                if isinstance(vol, (int, float)): vol = f"{vol:,.0f}"
+
+                st.write(f"**Market Cap:** {m_cap}")
                 st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
-                st.write(f"**Volume:** {info.get('volume', 'N/A')}")
-                st.write(f"**52 Week High:** {info.get('fiftyTwoWeekHigh', 'N/A')}")
+                st.write(f"**Volume:** {vol}")
+                
+                high_52 = info.get('fiftyTwoWeekHigh', 'N/A')
+                if isinstance(high_52, (int, float)): high_52 = f"${high_52:,.2f}"
+                st.write(f"**52 Week High:** {high_52}")
 
         except Exception as e:
             st.error(f"SYSTEM CRASH: {str(e)}")
