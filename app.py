@@ -112,8 +112,8 @@ def get_dynamic_leaderboard(tickers):
 
 # 3. Sidebar
 with st.sidebar:
-    st.title("⚡ SOAR CORE")
-    st.subheader("📡 TOP GAINERS")
+    st.title("SOAR CORE")
+    st.subheader("TOP GAINERS")
     top_5 = get_dynamic_leaderboard(CANDIDATE_POOL)
     for item in top_5:
         st.metric(label=item["ticker"], value=f"${item['price']:.2f}", delta=f"{item['delta']:.2f}%")
@@ -128,7 +128,7 @@ st.title("🚀 SOAR MARKETS")
 # Upgrade Button right under Title
 col_main, col_btn = st.columns([3, 1])
 with col_btn:
-    st.link_button("UPGRADE ACCESS ⚡", "https://buy.stripe.com/your_link")
+    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_link")
 
 ticker = st.text_input("INPUT STOCK PROTOCOL:", placeholder="e.g. NVDA").upper()
 
