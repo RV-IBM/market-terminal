@@ -61,22 +61,22 @@ def get_dynamic_leaderboard(tickers):
 
 # 3. GLOBAL SIDEBAR
 with st.sidebar:
-    st.title("⚡ TERMINAL CORE")
-    st.subheader("🏆 TOP PERFORMERS (24H)")
+    st.title("TERMINAL CORE")
+    st.subheader("TOP PERFORMERS (24H)")
     top_5 = get_dynamic_leaderboard(CANDIDATE_POOL)[:5]
     for item in top_5:
         st.metric(label=item["ticker"], value=f"${item['price']:.2f}", delta=f"{item['delta']:.2f}%")
     st.divider()
-    st.markdown("### **LEVEL 2 CLEARANCE**\n* 🌌 Unlimited Neural Dives\n* 📈 Institutional SMAs\n* 📑 Risk Matrices")
-    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/your_test_link", use_container_width=True)
+    st.markdown("### **LEVEL 2 CLEARANCE**\n* Unlimited Neural Dives\n* Institutional SMAs\n* Risk Matrices")
+    st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
     st.divider()
     is_premium = st.checkbox("🔓 Simulate Pro Access (Dev Mode)", value=False)
 
 # 4. TOP NAVIGATION NAVIGATION ROUTER
-nav_tab = st.radio("NAV", ["🏠 HOME ENGINE", "📡 FREE TERMINAL", "⚡ PRO QUANT DESK"], horizontal=True, label_visibility="collapsed")
+nav_tab = st.radio("NAV", ["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"], horizontal=True, label_visibility="collapsed")
 st.divider()
 
-if nav_tab == "🏠 HOME ENGINE":
+if nav_tab == "HOME ENGINE":
     st.title("🚀 SOAR MARKETS PLATFORM")
     st.subheader("Next-Generation Quantitative Market Telemetry")
     st.markdown("""
@@ -84,10 +84,10 @@ if nav_tab == "🏠 HOME ENGINE":
     with decentralized generative language frameworks to process raw volatility and deliver clean market insights.
     """)
 
-elif nav_tab == "📡 FREE TERMINAL":
+elif nav_tab == "FREE TERMINAL":
     # Call function from free_terminal.py, passing our data fetcher
     render_free_terminal(get_stock_data)
 
-elif nav_tab == "⚡ PRO QUANT DESK":
+elif nav_tab == "PRO QUANT DESK":
     # Call function from pro_terminal.py, passing permission check and data fetcher
     render_pro_terminal(is_premium, get_stock_data)
