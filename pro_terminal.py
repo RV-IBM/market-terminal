@@ -16,12 +16,12 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         st.subheader("💎 Unlock Institutional Features at Par with Elite Financial Platforms:")
         col1, col2 = st.columns(2)
         with col1:
-            st.markdown("* 📊 **Institutional Indicators:** Real-time $SMA_{50}$ calculations.\n* 🔄 **Flexible Windows:** Expand telemetry seamlessly across 90d, 180d, and YTD scopes.")
+            st.markdown("* **Institutional Indicators:** Real-time $SMA_{50}$ calculations.\n* **Flexible Windows:** Expand telemetry seamlessly across 90d, 180d, and YTD scopes.")
         with col2:
-            st.markdown("* 🧮 **Asymmetric Risk Matrix:** AI-modeled upside volatility mappings.\n* 🚀 **Breakout Thresholds:** Precision trigger ceiling alerts.")
+            st.markdown("* **Asymmetric Risk Matrix:** AI-modeled upside volatility mappings.\n* **Breakout Thresholds:** Precision trigger ceiling alerts.")
             
         st.divider()
-        st.link_button("⚡ UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/your_test_link")
+        st.link_button("⚡ UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00")
         
     else:
         st.title("⚡ INSTITUTIONAL QUANT DESK")
@@ -59,7 +59,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     col_risk, col_break = st.columns(2)
                     
                     with col_risk:
-                        st.subheader("🧮 ASYMMETRIC RISK MATRIX")
+                        st.subheader("ASYMMETRIC RISK MATRIX")
                         with st.container(border=True):
                             st.markdown(f"""
                             | Allocation Vector | Target Yield | Tail Risk Stop | Risk-Reward Ratio |
@@ -71,14 +71,14 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             """)
                             
                     with col_break:
-                        st.subheader("🚀 TECHNICAL BREAKOUT THRESHOLDS")
+                        st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
                         with st.container(border=True):
                             current_price = filtered_hist['Close'].iloc[-1]
                             resistance = info.get('fiftyTwoWeekHigh', current_price * 1.05)
                             support = filtered_hist['Close'].min()
-                            st.write(f"🎯 **Macro Resistance Ceiling:** `${resistance:,.2f}`")
-                            st.write(f"🛡️ **Dynamic Baseline Support:** `${support:,.2f}`")
-                            st.write(f"⚡ **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
+                            st.write(f" **Macro Resistance Ceiling:** `${resistance:,.2f}`")
+                            st.write(f" **Dynamic Baseline Support:** `${support:,.2f}`")
+                            st.write(f" **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
                             
                     if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
                         with st.spinner("Streaming Deep-Dive Telemetry..."):
