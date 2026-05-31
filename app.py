@@ -32,6 +32,22 @@ st.markdown("""
     }
     .stButton>button:hover, [data-testid="stLinkButton"]>a:hover { filter: brightness(1.2); box-shadow: 0 0 20px rgba(0, 242, 255, 0.7) !important; }
     .lock-box { background: rgba(15, 5, 5, 0.6); border: 2px dashed #ff3333; border-radius: 8px; padding: 30px; text-align: center; }
+    /* --- TAB NAVIGATION STYLING --- */
+    button[data-baseweb="tab"] {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+
+    /* Target the active tab indicator and set to Neon Cyan/Blue */
+    div[data-baseweb="tab-list"] button[aria-selected="true"] {
+        border-bottom: 2px solid #00f2ff !important;
+        color: #00f2ff !important;
+    }
+
+    /* Ensure hover effect stays consistent */
+    div[data-baseweb="tab-list"] button:hover {
+        color: #00f2ff !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
