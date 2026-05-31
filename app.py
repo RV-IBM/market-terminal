@@ -37,17 +37,21 @@ st.markdown("""
         font-family: 'Courier New', monospace;
         font-weight: bold;
     }
+/* FORCE THE TAB LIST TO USE YOUR NEON BLUE */
+div[data-baseweb="tab-list"] {
+    background-color: transparent !important;
+}
 
-    /* Target the active tab indicator and set to Neon Cyan/Blue */
-    div[data-baseweb="tab-list"] button[aria-selected="true"] {
-        border-bottom: 2px solid #00f2ff !important;
-        color: #00f2ff !important;
-    }
+/* OVERRIDE THE DEFAULT RED/STREAMLIT ACCENT UNDERLINE */
+div[data-baseweb="tab-list"] div[role="presentation"] {
+    background-color: #00f2ff !important;
+}
 
-    /* Ensure hover effect stays consistent */
-    div[data-baseweb="tab-list"] button:hover {
-        color: #00f2ff !important;
-    }
+/* FORCE THE TEXT COLOR OF THE ACTIVE TAB */
+div[data-baseweb="tab-list"] button[aria-selected="true"] {
+    color: #00f2ff !important;
+    border-bottom: 2px solid #00f2ff !important;
+}
     </style>
     """, unsafe_allow_html=True)
 
