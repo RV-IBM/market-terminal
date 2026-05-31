@@ -71,23 +71,18 @@ with st.sidebar:
     st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
     st.divider()
     is_premium = st.checkbox("🔓 Simulate Pro Access (Dev Mode)", value=False)
+# Replace your existing st.radio block with this:
+tab1, tab2, tab3 = st.tabs(["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"])
 
-# 4. TOP NAVIGATION NAVIGATION ROUTER
-nav_tab = st.radio("NAV", ["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"], horizontal=True, label_visibility="collapsed")
-st.divider()
-
-if nav_tab == "HOME ENGINE":
+with tab1:
+    # Everything for your Home page goes here
     st.title("🚀 SOAR MARKETS PLATFORM")
-    st.subheader("Next-Generation Quantitative Market Telemetry")
-    st.markdown("""
-    Welcome to the tactical interface. **SOAR MARKETS** bridges real-time structural metadata tracking 
-    with decentralized generative language frameworks to process raw volatility and deliver clean market insights.
-    """)
+    # ... your home content ...
 
-elif nav_tab == "FREE TERMINAL":
-    # Call function from free_terminal.py, passing our data fetcher
+with tab2:
+    # Everything for your Free Terminal goes here
     render_free_terminal(get_stock_data)
 
-elif nav_tab == "PRO QUANT DESK":
-    # Call function from pro_terminal.py, passing permission check and data fetcher
+with tab3:
+    # Everything for your Pro Terminal goes here
     render_pro_terminal(is_premium, get_stock_data)
