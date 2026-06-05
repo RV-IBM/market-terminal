@@ -95,9 +95,29 @@ with st.sidebar:
 tab1, tab2, tab3 = st.tabs(["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"])
 
 with tab1:
-    # Everything for your Home page goes here
-    st.title("🚀 SOAR MARKETS PLATFORM")
-    # ... your home content ...
+    st.title("SOAR MARKETS PLATFORM")
+    st.markdown("### SYSTEMATIC INTELLIGENCE & MICROSTRUCTURE ANALYTICS")
+    
+    st.divider()
+    
+    st.markdown("""
+    **SOAR MARKETS** is a next-generation quantitative analytics interface designed to bridge the gap between institutional-grade market telemetry and decentralized generative AI. 
+
+    We engineer hybrid computational frameworks that ingest raw market microstructure data and synthesize it alongside real-time narrative sentiment. By fusing deterministic mathematical models with advanced neural language processing, we provide our users with an asymmetric edge in modern financial markets.
+
+    ### CORE INFRASTRUCTURE
+    * **Algorithmic Telemetry:** Processing real-time volatility, volume footprints, and algorithmic momentum indicators.
+    * **Neural Sentiment Synthesis:** Deploying specialized LLMs to decode macro-economic narratives and structural market catalysts.
+    * **Systematic Execution Edge:** Translating complex data matrices into clear, actionable risk parameters and breakout thresholds.
+
+    ---
+    
+    ### INITIALIZE YOUR ENVIRONMENT
+    Navigate via the top-level command tabs to access your designated workspace:
+    
+    * **FREE TERMINAL:** Access foundational 30-day directional asset vectors, standard volume metrics, and raw neural network summaries.
+    * **PRO QUANT DESK:** Gain Level 2 Clearance. Track multi-frame institutional indicators ($SMA_{50}$), live structural depth matrices, and dynamic asymmetric risk models.
+    """)
 
 with tab2:
     # Everything for your Free Terminal goes here
