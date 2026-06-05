@@ -179,10 +179,12 @@ with tab1:
     **SYSTEMATIC DISCLAIMER:** The data, telemetry, and neural output provided by SOAR MARKETS are for educational, informational, and quantitative research purposes only. This platform does not provide personalized financial, legal, or investment advice. Algorithmic outputs, probabilistic risk matrices, and neural synthesis should not be construed as direct solicitations to buy or sell any financial instrument. Trading high-velocity assets involves substantial risk of loss. Users assume full responsibility for any capital allocation decisions executed outside this environment. System architecture is subject to real-time market conditions.
     """)
 
+# app.py
+
 with tab2:
-    # Everything for your Free Terminal goes here
-    render_free_terminal(get_stock_data)
+    # Update this line (formerly get_stock_data)
+    render_free_terminal(get_stock_data_func)
 
 with tab3:
-    # Everything for your Pro Terminal goes here
-    render_pro_terminal(is_premium, get_stock_data)
+    # Do the same for your Pro Terminal if it's there
+    render_pro_terminal(is_premium, get_stock_data_func)
