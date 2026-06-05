@@ -1,5 +1,6 @@
 import streamlit as st
 import yfinance as yf
+import requests
 import datetime
 from free_terminal import render_free_terminal
 from pro_terminal import render_pro_terminal
@@ -55,30 +56,23 @@ div[data-baseweb="tab-list"] button[aria-selected="true"] {
 
 # 2. GLOBAL SHARED DATA CACHING
 @st.cache_data(ttl=3600)
-def get_stock_data(symbol, range_type="free"):
-    import requests # Imported here so you don't have to scroll to the top of app.py
-    
-    # 1. Create a custom session simulating a desktop browser to bypass Yahoo filters
+def get_stock_data_func(ticker, range_type="free"):
+    # Initialize the session
     session = requests.Session()
     session.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     })
-    
-    # 2. Attach the masked session to the Ticker
-    stock = yf.Ticker(symbol.upper(), session=session)
-    period = "1y" if range_type == "pro" else "1mo"
-    hist = stock.history(period=period)
-    
-    # 3. CRITICAL SAFETY: 'stock.info' causes the 429 crashes. This protects your UI.
-    try:
-        info = stock.info
-        if not info: # If Yahoo returns nothing, trigger the fallback
-            info = {}
-    except Exception:
-            info = {} 
-        
-        return info, hist
 
+    # Fetch data
+    try:
+        stock = yf.Ticker(ticker, session=session)
+        info = stock.info
+        hist = stock.history(period="1mo")
+    except Exception:
+        info = {}
+        hist = None
+        
+    return info, hist
 # This MUST be at the very left edge (0 spaces)
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 
