@@ -1,8 +1,6 @@
 import streamlit as st
 import yfinance as yf
-from datetime import datetime
-
-# Import the page layouts from your new files
+import datetime
 from free_terminal import render_free_terminal
 from pro_terminal import render_pro_terminal
 
@@ -76,19 +74,17 @@ def get_stock_data(symbol, range_type="free"):
         info = stock.info
         if not info: # If Yahoo returns nothing, trigger the fallback
             info = {}
-    except Exception:
+except Exception:
             info = {} 
-            # The 'return' must be indented to match the 'def' above
-            # (or be at the same level as the 'try' statement)
-    return info, hist
+        
+        return info, hist
 
-# EVERYTHING BELOW HERE MUST BE AT THE VERY LEFT MARGIN (0 INDENTATION)
+# This MUST be at the very left edge (0 spaces)
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 
 @st.cache_data(ttl=600)
 def get_dynamic_leaderboard(tickers):
     leaderboard = []
-    # ... rest of your function ...
     data = yf.download(tickers, period="2d", interval="1d", group_by='ticker', progress=False)
     for t in tickers:
         try:
@@ -98,9 +94,9 @@ def get_dynamic_leaderboard(tickers):
                 prev = hist['Close'].iloc[-2]
                 delta = ((current - prev) / prev) * 100
                 leaderboard.append({"ticker": t, "price": current, "delta": delta})
-        except: continue
+        except: 
+            continue
     return sorted(leaderboard, key=lambda x: x['delta'], reverse=True)
-
 # 3. GLOBAL SIDEBAR
 with st.sidebar:
     st.title("TERMINAL CORE")
