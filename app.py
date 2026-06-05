@@ -100,23 +100,66 @@ with tab1:
     
     st.divider()
     
+    # 1. THE MISSION OBJECTIVE
+    st.subheader("OUR OBJECTIVE")
     st.markdown("""
-    **SOAR MARKETS** is a next-generation quantitative analytics interface designed to bridge the gap between institutional-grade market telemetry and decentralized generative AI. 
-
-    We engineer hybrid computational frameworks that ingest raw market microstructure data and synthesize it alongside real-time narrative sentiment. By fusing deterministic mathematical models with advanced neural language processing, we provide our users with an asymmetric edge in modern financial markets.
-
-    ### CORE INFRASTRUCTURE
-    * **Algorithmic Telemetry:** Processing real-time volatility, volume footprints, and algorithmic momentum indicators.
-    * **Neural Sentiment Synthesis:** Deploying specialized LLMs to decode macro-economic narratives and structural market catalysts.
-    * **Systematic Execution Edge:** Translating complex data matrices into clear, actionable risk parameters and breakout thresholds.
-
-    ---
+    **SOAR MARKETS** provides professional-grade market telemetry by seamlessly bridging the gap between 
+    sophisticated financial data infrastructure and advanced generative artificial intelligence. 
+    Our objective is to equip market participants with high-fidelity analytics, quantitative risk metrics, 
+    and accelerated neural synthesis to navigate complex liquidity environments with precision.
+    """)
     
-    ### INITIALIZE YOUR ENVIRONMENT
-    Navigate via the top-level command tabs to access your designated workspace:
+    st.write("") # Spacer
     
-    * **FREE TERMINAL:** Access foundational 30-day directional asset vectors, standard volume metrics, and raw neural network summaries.
-    * **PRO QUANT DESK:** Gain Level 2 Clearance. Track multi-frame institutional indicators ($SMA_{50}$), live structural depth matrices, and dynamic asymmetric risk models.
+    # 2. WHY CHOOSE US (THE ARCHITECTURE)
+    st.subheader("THE ALPHA ARCHITECTURE: CORE CAPABILITIES")
+    st.markdown("Our platform is engineered from the ground up to deliver structural clarity and computational depth.")
+    
+    col_edge1, col_edge2 = st.columns(2)
+    with col_edge1:
+        with st.container(border=True):
+            st.markdown("""
+            **1. High-Fidelity Microstructure Data** Access granular market telemetry, including order-flow velocity vectors, real-time day boundaries, and advanced asset volatility metrics calculated instantly.
+            
+            **2. Contextual Neural Synthesis** Utilize our specialized LLM pipelines designed to evaluate macro-economic catalysts, parsing complex textual variables into clean, actionable insights.
+            """)
+    with col_edge2:
+        with st.container(border=True):
+            st.markdown("""
+            **3. Advanced Probabilistic Modeling** Evaluate structural market parameters through clear mathematical frameworks. Map macro resistance ceilings and dynamic support baselines for optimal calculation.
+            
+            **4. Extended Telemetry Horizons** Expand your analytical scope beyond baseline intervals. Our multi-period framework computes rolling 90-day, 180-day, and Year-To-Date indicators on demand.
+            """)
+
+    st.divider()
+
+    # 3. THE PRO SUBSCRIPTION PITCH
+    st.subheader("LEVEL 2 CLEARANCE PRIVILEGES")
+    st.markdown("Unlock the full computational power of the SOAR MARKETS engine by upgrading to our premium tier.")
+    
+    col_pro1, col_pro2 = st.columns(2)
+    with col_pro1:
+        st.markdown("""
+        *  **Asymmetric Risk Matrices:** Advanced modeling mapping upside momentum against downside structural parameters.
+        *  **Technical Breakout Thresholds:** Precision mathematical signaling for resistance ceilings and continuation triggers.
+        """)
+    with col_pro2:
+        st.markdown("""
+        *  **Institutional Indicators:** Algorithmic $SMA_{50}$ moving average overlays rendered natively on high-horizon charts.
+        *  **Priority Execution Pipeline:** Zero-throttling data processing via dedicated premium network routing.
+        """)
+    
+    st.write("") # Spacer
+    
+    # 4. UPGRADE BUTTON
+    st.link_button("INITIALIZE LEVEL 2 CLEARANCE (PRO UPGRADE)", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
+
+    st.write("")
+    st.write("")
+    
+    # 5. INSTITUTIONAL LEGAL DISCLAIMER
+    st.caption("""
+    **SYSTEMATIC DISCLAIMER:** The data, telemetry, and neural output provided by SOAR MARKETS are for educational, informational, and quantitative research purposes only. This platform does not provide personalized financial, legal, or investment advice. Algorithmic outputs, probabilistic risk matrices, and neural synthesis should not be construed as direct solicitations to buy or sell any financial instrument. Trading high-velocity assets involves substantial risk of loss. Users assume full responsibility for any capital allocation decisions executed outside this environment. System architecture is subject to real-time market conditions.
     """)
 
 with tab2:
