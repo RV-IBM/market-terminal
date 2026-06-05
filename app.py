@@ -57,22 +57,27 @@ div[data-baseweb="tab-list"] button[aria-selected="true"] {
 # 2. GLOBAL SHARED DATA CACHING
 @st.cache_data(ttl=3600)
 def get_stock_data_func(ticker, range_type="free"):
-    # Initialize the session
+    # Everything inside the function MUST be indented by 4 spaces
     session = requests.Session()
     session.headers.update({
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
     })
 
-    # Fetch data
     try:
-        stock = yf.Ticker(ticker, session=session)
-        info = stock.info
+        # 8 spaces of indentation here
+        stock = yf.Ticker(ticker.upper(), session=session)
         hist = stock.history(period="1mo")
+        info = stock.info
     except Exception:
+        # 8 spaces of indentation here
         info = {}
         hist = None
-        
+
+    # This MUST be indented 4 spaces to align with the 'session' line
     return info, hist
+
+# AFTER the function, move back to 0 indentation for global variables
+CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 # This MUST be at the very left edge (0 spaces)
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 
