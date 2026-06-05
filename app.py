@@ -80,7 +80,7 @@ def get_stock_data(symbol, range_type="free"):
             info = {} 
             # The 'return' must be indented to match the 'def' above
             # (or be at the same level as the 'try' statement)
-        
+    
     return info, hist
 
 # EVERYTHING BELOW HERE MUST BE AT THE VERY LEFT MARGIN (0 INDENTATION)
