@@ -80,20 +80,18 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             st.write(f" **Dynamic Baseline Support:** `${support:,.2f}`")
                             st.write(f" **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
                             
-                    if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-                       # ... lines above ...
 
-if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-        # ... lines above ...
+# Ensure this if statement is aligned with the code above it
+    if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
+        # Everything below here MUST be indented by 4 spaces relative to the 'if' above
+        info, hist = get_stock_data_func(ticker, range_type="pro")
         
-        # CHANGED 'ticker' to 'pro_ticker' here:
-        info, hist = get_stock_data_func(pro_ticker, range_type="pro")
         with st.spinner("Decoding Advanced Quant Telemetry..."):
             url = st.secrets["PIPEDREAM_URL"]
             
             try:
-                # CHANGED 'ticker' to 'pro_ticker' in the JSON payload here:
-                res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
+                # Pro payload sent to Pipedream
+                res = requests.post(url, json={"ticker": ticker, "tier": "pro"}, timeout=45)
                 
                 if res.status_code == 200:
                     st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
@@ -104,14 +102,14 @@ if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
                                 import ast
                                 parsed_dict = ast.literal_eval(raw_prediction)
                                 clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
-                            else: 
+                            else:
                                 clean_output = str(raw_prediction)
-                        except: 
+                        except:
                             clean_output = str(raw_prediction)
                         st.markdown(clean_output)
-                else: 
+                else:
                     st.error("NEURAL LINK FAILURE")
-                    
+            
             except requests.exceptions.Timeout:
                 st.warning("📡 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
             except requests.exceptions.RequestException:
