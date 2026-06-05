@@ -48,7 +48,10 @@ st.markdown("""
 @st.cache_data(ttl=3600)
 def get_stock_data_func(ticker, range_type="free"):
     session = requests.Session()
-    session.headers.update({'User-Agent': 'Mozilla/5.0'})
+    session.headers.update({
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+    })
+
     try:
         stock = yf.Ticker(ticker.upper(), session=session)
         hist = stock.history(period="1mo")
@@ -96,28 +99,45 @@ with tab1:
     st.divider()
     
     st.subheader("OUR OBJECTIVE")
-    st.markdown("SOAR MARKETS provides professional-grade market telemetry by seamlessly bridging the gap between sophisticated financial data infrastructure and advanced generative artificial intelligence. Our objective is to equip market participants with high-fidelity analytics, quantitative risk metrics, and accelerated neural synthesis.")
+    st.markdown("SOAR MARKETS provides professional-grade market telemetry by seamlessly bridging the gap between sophisticated financial data infrastructure and advanced generative artificial intelligence. Our objective is to equip market participants with high-fidelity analytics, quantitative risk metrics, and accelerated neural synthesis to navigate complex liquidity environments with precision.")
     
     st.write("")
     st.subheader("THE ALPHA ARCHITECTURE: CORE CAPABILITIES")
-    col1, col2 = st.columns(2)
-    with col1:
+    col_edge1, col_edge2 = st.columns(2)
+    with col_edge1:
         with st.container(border=True):
-            st.markdown("**1. High-Fidelity Microstructure Data**\nAccess granular market telemetry, including order-flow velocity vectors and advanced asset volatility.")
-    with col2:
+            st.markdown("""
+            **1. High-Fidelity Microstructure Data** Access granular market telemetry, including order-flow velocity vectors, real-time day boundaries, and advanced asset volatility metrics calculated instantly.
+            
+            **2. Contextual Neural Synthesis** Utilize our specialized LLM pipelines designed to evaluate macro-economic catalysts, parsing complex textual variables into clean, actionable insights.
+            """)
+    with col_edge2:
         with st.container(border=True):
-            st.markdown("**2. Contextual Neural Synthesis**\nUtilize our specialized LLM pipelines designed to evaluate macro-economic catalysts into actionable insights.")
-    
+            st.markdown("""
+            **3. Advanced Probabilistic Modeling** Evaluate structural market parameters through clear mathematical frameworks. Map macro resistance ceilings and dynamic support baselines for optimal calculation.
+            
+            **4. Extended Telemetry Horizons** Expand your analytical scope beyond baseline intervals. Our multi-period framework computes rolling 90-day, 180-day, and Year-To-Date indicators on demand.
+            """)
+
     st.divider()
     st.subheader("LEVEL 2 CLEARANCE PRIVILEGES")
-    col3, col4 = st.columns(2)
-    col3.markdown("* **Asymmetric Risk Matrices:** Advanced modeling mapping upside momentum.")
-    col4.markdown("* **Technical Breakout Thresholds:** Precision signaling for resistance and support.")
-    
+    st.markdown("Unlock the full computational power of the SOAR MARKETS engine by upgrading to our premium tier.")
+    col_pro1, col_pro2 = st.columns(2)
+    with col_pro1:
+        st.markdown("""
+        *  **Asymmetric Risk Matrices:** Advanced modeling mapping upside momentum against downside structural parameters.
+        *  **Technical Breakout Thresholds:** Precision mathematical signaling for resistance ceilings and continuation triggers.
+        """)
+    with col_pro2:
+        st.markdown("""
+        *  **Institutional Indicators:** Algorithmic $SMA_{50}$ moving average overlays rendered natively on high-horizon charts.
+        *  **Priority Execution Pipeline:** Zero-throttling data processing via dedicated premium network routing.
+        """)
+
     st.link_button("INITIALIZE LEVEL 2 CLEARANCE (PRO UPGRADE)", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
     
     st.divider()
-    st.caption("**SYSTEMATIC DISCLAIMER:** The data, telemetry, and neural output provided by SOAR MARKETS are for educational, informational, and quantitative research purposes only. This platform does not provide personalized financial, legal, or investment advice.")
+    st.caption("**SYSTEMATIC DISCLAIMER:** The data, telemetry, and neural output provided by SOAR MARKETS are for educational, informational, and quantitative research purposes only. This platform does not provide personalized financial, legal, or investment advice. Algorithmic outputs, probabilistic risk matrices, and neural synthesis should not be construed as direct solicitations to buy or sell any financial instrument. Trading high-velocity assets involves substantial risk of loss. Users assume full responsibility for any capital allocation decisions executed outside this environment. System architecture is subject to real-time market conditions.")
 
 with tab2:
     render_free_terminal(get_stock_data_func)
