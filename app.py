@@ -76,7 +76,7 @@ def get_stock_data(symbol, range_type="free"):
         info = stock.info
         if not info: # If Yahoo returns nothing, trigger the fallback
             info = {}
-  except Exception:
+    except Exception:
             info = {} 
             # The 'return' must be indented to match the 'def' above
             # (or be at the same level as the 'try' statement)
