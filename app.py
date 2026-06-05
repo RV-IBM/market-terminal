@@ -80,7 +80,6 @@ def get_stock_data(symbol, range_type="free"):
         info = {} # Empty fallback dict allows your UI to render charts without crashing
         
     return info, hist
-
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 
 @st.cache_data(ttl=600)
