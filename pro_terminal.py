@@ -21,10 +21,10 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             st.markdown("* **Asymmetric Risk Matrix:** AI-modeled upside volatility mappings.\n* **Breakout Thresholds:** Precision trigger ceiling alerts.")
             
         st.divider()
-        st.link_button("⚡ UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00")
+        st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00")
         
     else:
-        st.title("⚡ INSTITUTIONAL QUANT DESK")
+        st.title("INSTITUTIONAL QUANT DESK")
         col_input, col_window = st.columns([2, 1])
         with col_input:
             pro_ticker = st.text_input("INPUT PREMIUM PROTOCOL:", placeholder="e.g., NVDA, TSLA").upper()
@@ -79,42 +79,42 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             st.write(f" **Macro Resistance Ceiling:** `${resistance:,.2f}`")
                             st.write(f" **Dynamic Baseline Support:** `${support:,.2f}`")
                             st.write(f" **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
-                            
 
-# Ensure this if statement is aligned with the code above it
-    if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-        # Everything below here MUST be indented by 4 spaces relative to the 'if' above
-        info, hist = get_stock_data_func(ticker, range_type="pro")
-        
-        with st.spinner("Decoding Advanced Quant Telemetry..."):
-            url = st.secrets["PIPEDREAM_URL"]
+            # All blocks below are now indented to sit inside the 'else' block
+            except Exception as e:
+                st.error(f"Error fetching data: {e}")
+
+        # The Button logic is now indented to sit inside the 'else' block
+        st.divider()
+        if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
+            # Everything below here MUST be indented 12 spaces relative to the start of the line
+            info, hist = get_stock_data_func(pro_ticker, range_type="pro")
             
-            try:
-                # Pro payload sent to Pipedream
-                res = requests.post(url, json={"ticker": ticker, "tier": "pro"}, timeout=45)
+            with st.spinner("Decoding Advanced Quant Telemetry..."):
+                url = st.secrets["PIPEDREAM_URL"]
                 
-                if res.status_code == 200:
-                    st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
-                    with st.container(border=True):
-                        raw_prediction = res.json().get("prediction", "No telemetry data.")
-                        try:
-                            if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
-                                import ast
-                                parsed_dict = ast.literal_eval(raw_prediction)
-                                clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
-                            else:
+                try:
+                    # Pro payload sent to Pipedream
+                    res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
+                    
+                    if res.status_code == 200:
+                        st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
+                        with st.container(border=True):
+                            raw_prediction = res.json().get("prediction", "No telemetry data.")
+                            try:
+                                if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
+                                    import ast
+                                    parsed_dict = ast.literal_eval(raw_prediction)
+                                    clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
+                                else:
+                                    clean_output = str(raw_prediction)
+                            except:
                                 clean_output = str(raw_prediction)
-                        except:
-                            clean_output = str(raw_prediction)
-                        st.markdown(clean_output)
-                else:
-                    st.error("NEURAL LINK FAILURE")
-            
-            except requests.exceptions.Timeout:
-                st.warning("📡 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
-            except requests.exceptions.RequestException:
-                st.error("⚠️ PIPELINE ERROR: Interface gateway disconnected. Please check your network connection.")
-
-st.divider()
-
-# ... lines below ...
+                            st.markdown(clean_output)
+                    else:
+                        st.error("NEURAL LINK FAILURE")
+                
+                except requests.exceptions.Timeout:
+                    st.warning("📡 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
+                except requests.exceptions.RequestException:
+                    st.error("⚠️ PIPELINE ERROR: Interface gateway disconnected. Please check your network connection.")
