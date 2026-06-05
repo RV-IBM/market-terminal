@@ -76,15 +76,20 @@ def get_stock_data(symbol, range_type="free"):
         info = stock.info
         if not info: # If Yahoo returns nothing, trigger the fallback
             info = {}
-    except Exception:
-        info = {} # Empty fallback dict allows your UI to render charts without crashing
+  except Exception:
+            info = {} 
+            # The 'return' must be indented to match the 'def' above
+            # (or be at the same level as the 'try' statement)
         
-    return info, hist
+        return info, hist
+
+# EVERYTHING BELOW HERE MUST BE AT THE VERY LEFT MARGIN (0 INDENTATION)
 CANDIDATE_POOL = ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AVGO", "META", "AMZN", "NFLX", "AMD", "SMCI", "ARM", "ORCL", "PLTR"]
 
 @st.cache_data(ttl=600)
 def get_dynamic_leaderboard(tickers):
     leaderboard = []
+    # ... rest of your function ...
     data = yf.download(tickers, period="2d", interval="1d", group_by='ticker', progress=False)
     for t in tickers:
         try:
