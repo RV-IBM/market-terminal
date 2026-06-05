@@ -81,13 +81,38 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             st.write(f" **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
                             
                     if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-                        with st.spinner("Streaming Deep-Dive Telemetry..."):
-                            url = st.secrets["PIPEDREAM_URL"]
-                            res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=60)
-                            if res.status_code == 200:
-                                st.success("📡 DEEP-DIVE NEURAL LINK ESTABLISHED")
-                                with st.container(border=True):
-                                    st.markdown(res.json().get("prediction", "No data returned."))
-                            else: st.error("Premium data streaming pipeline offline.")
-                else: st.warning("Asset structure contains an empty database footprint.")
-            except Exception as e: st.error(f"PRO MATRIX EXECUTOR ERROR: {str(e)}")
+                       # ... lines above ...
+
+info, hist = get_stock_data_func(ticker, range_type="pro")
+with st.spinner("Decoding Advanced Quant Telemetry..."):
+    url = st.secrets["PIPEDREAM_URL"]
+    
+    try:
+        # Pro payload sent to Pipedream
+        res = requests.post(url, json={"ticker": ticker, "tier": "pro"}, timeout=45)
+        
+        if res.status_code == 200:
+            st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
+            with st.container(border=True):
+                raw_prediction = res.json().get("prediction", "No telemetry data.")
+                try:
+                    if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
+                        import ast
+                        parsed_dict = ast.literal_eval(raw_prediction)
+                        clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
+                    else: 
+                        clean_output = str(raw_prediction)
+                except: 
+                    clean_output = str(raw_prediction)
+                st.markdown(clean_output)
+        else: 
+            st.error("NEURAL LINK FAILURE")
+            
+    except requests.exceptions.Timeout:
+        st.warning("📡 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
+    except requests.exceptions.RequestException:
+        st.error("⚠️ PIPELINE ERROR: Interface gateway disconnected. Please check your network connection.")
+
+st.divider()
+
+# ... lines below ...
