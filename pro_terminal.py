@@ -32,15 +32,18 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             window_selection = st.selectbox("TELEMETRY INCREASE WINDOW:", ["90 Days", "180 Days", "Year-To-Date (YTD)", "Full Year"])
 
         if pro_ticker:
-            try:
-                info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
+        try:
+            info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
+
+            # -> Press TAB once so this aligns with 'info' right above it!
+            if full_hist is not None and not full_hist.empty:
                 
-               if full_hist is not None and not full_hist.empty:
-                    if window_selection == "90 Days": filtered_hist = full_hist.last("90D")
-                    elif window_selection == "180 Days": filtered_hist = full_hist.last("180D")
-                    elif window_selection == "Year-To-Date (YTD)":
-                        filtered_hist = full_hist[full_hist.index.year == datetime.now().year]
-                    else: filtered_hist = full_hist.copy()
+                # These lines also shift over so they stay inside the 'if' statement
+                if window_selection == "90 Days": filtered_hist = full_hist.last("90D")
+                elif window_selection == "180 Days": filtered_hist = full_hist.last("180D")
+                elif window_selection == "Year-To-Date (YTD)":
+                    filtered_hist = full_hist[full_hist.index.year == datetime.now().year]
+                else: filtered_hist = full_hist.copy()
 
             # FIXED: 'Close' must be capitalized to avoid a KeyError from yfinance
             full_hist['SMA_50'] = full_hist['Close'].rolling(window=50).mean()
