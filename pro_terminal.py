@@ -77,8 +77,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         else:
             st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable. Please try another ticker or wait a moment.")
                             
-                            *AI Notice: Variance window is stable above current 50-day SMA ($ {filtered_hist['SMA_50'].iloc[-1]:.2f}).*
-                            """)
+                           
                             
                     with col_break:
                         st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
