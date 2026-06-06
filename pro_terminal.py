@@ -36,11 +36,11 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                 info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
                 
                if full_hist is not None and not full_hist.empty:
-            if window_selection == "90 Days": filtered_hist = full_hist.last("90D")
-            elif window_selection == "180 Days": filtered_hist = full_hist.last("180D")
-            elif window_selection == "Year-To-Date (YTD)":
-                filtered_hist = full_hist[full_hist.index.year == datetime.now().year]
-            else: filtered_hist = full_hist.copy()
+                    if window_selection == "90 Days": filtered_hist = full_hist.last("90D")
+                    elif window_selection == "180 Days": filtered_hist = full_hist.last("180D")
+                    elif window_selection == "Year-To-Date (YTD)":
+                        filtered_hist = full_hist[full_hist.index.year == datetime.now().year]
+                    else: filtered_hist = full_hist.copy()
 
             # FIXED: 'Close' must be capitalized to avoid a KeyError from yfinance
             full_hist['SMA_50'] = full_hist['Close'].rolling(window=50).mean()
