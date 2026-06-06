@@ -43,22 +43,22 @@ def render_free_terminal(get_stock_data_func):
                 # Chart and Stats rendering (Runs after the AI check finishes)
                 st.divider()
 
-if hist is not None and not hist.empty:
-    col_chart, col_stats = st.columns([2, 1])
+                if hist is not None and not hist.empty:
+                    col_chart, col_stats = st.columns([2, 1])
     
-    with col_chart:
-        st.subheader(f"📊 {ticker} 30-DAY TREND")
-        st.line_chart(hist['Close'])  # <-- MAKE SURE THIS IS A CAPITAL 'C'
+                    with col_chart:
+                        st.subheader(f"📊 {ticker} 30-DAY TREND")
+                        st.line_chart(hist['Close'])  # <-- MAKE SURE THIS IS A CAPITAL 'C'
         
-    with col_stats:                   # <-- THIS MUST ALIGN WITH 'with col_chart:'
-        st.subheader("📄 KEY METRICS")
-        st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
-        st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
-        st.write(f"**Volume:** {info.get('volume', 'N/A')}")
-        st.write(f"**52 Week High:** {info.get('fiftyTwoWeekHigh', 'N/A')}")
+                    with col_stats:                   # <-- THIS MUST ALIGN WITH 'with col_chart:'
+                        st.subheader("📄 KEY METRICS")
+                        st.write(f"**Market Cap:** {info.get('marketCap', 'N/A')}")
+                        st.write(f"**P/E Ratio:** {info.get('trailingPE', 'N/A')}")
+                        st.write(f"**Volume:** {info.get('volume', 'N/A')}")
+                        st.write(f"**52 Week High:** {info.get('fiftyTwoWeekHigh', 'N/A')}")
         
-else:
-    st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {ticker} is temporarily unavailable.")
+                else:
+                    st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {ticker} is temporarily unavailable.")
 
             except Exception as e:
                 st.error(f"SYSTEM CRASH: {str(e)}")
