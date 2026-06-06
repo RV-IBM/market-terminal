@@ -35,48 +35,63 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             try:
                 info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
     
-                # -> Press TAB once so this aligns with 'info' right above it!
                 if full_hist is not None and not full_hist.empty:
-                    
-                    # These lines also shift over so they stay inside the 'if' statement
-                    if window_selection == "90 Days": filtered_hist = full_hist.last("90D")
-                    elif window_selection == "180 Days": filtered_hist = full_hist.last("180D")
+                    # 1. Handle Window Selection
+                    if window_selection == "90 Days": 
+                        filtered_hist = full_hist.last("90D")
+                    elif window_selection == "180 Days": 
+                        filtered_hist = full_hist.last("180D")
                     elif window_selection == "Year-To-Date (YTD)":
+                        from datetime import datetime
                         filtered_hist = full_hist[full_hist.index.year == datetime.now().year]
-                    else: filtered_hist = full_hist.copy()
-
-            # FIXED: 'Close' must be capitalized to avoid a KeyError from yfinance
-            full_hist['SMA_50'] = full_hist['Close'].rolling(window=50).mean()
-            filtered_hist['SMA_50'] = full_hist['SMA_50'].loc[filtered_hist.index]
-
-            st.subheader(f"📊 {pro_ticker} DETAILED ALGORITHMIC PROFILE ({window_selection})")
-            st.line_chart(filtered_hist[['Close', 'SMA_50']])
-
-            st.subheader("📄 DETAILED LIVE MICROSTRUCTURE DATA")
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Day High", f"${info.get('dayHigh', 0):,.2f}")
-            m2.metric("Day Low", f"${info.get('dayLow', 0):,.2f}")
-            m3.metric("Avg Volume (10d)", f"{info.get('averageDailyVolume10Day', 0):,}")
-            m4.metric("Beta Coefficient", f"{info.get('beta', 'N/A')}")
-
-            st.divider()
-            col_risk, col_break = st.columns(2)
-
-            with col_risk:
-                st.subheader("ASYMMETRIC RISK MATRIX")
-                with st.container(border=True):
-                    st.markdown("""
-| Allocation Vector | Target Yield | Tail Risk Stop | Risk-Reward Ratio |
-| :--- | :--- | :--- | :--- |
-| **Primary Momentum** | +24.50% | -6.20% | **3.95x** |
-| **Asymmetric Hedge** | +12.00% | -2.50% | **4.80x** |
-""")
-            
-            # Add your col_break code here if you have any!
-            
-        else:
-            st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable. Please try another ticker or wait a moment.")
-                            
+                    else: 
+                        filtered_hist = full_hist.copy()
+    
+                    # 2. Calculate Technicals
+                    full_hist['SMA_50'] = full_hist['Close'].rolling(window=50).mean()
+                    filtered_hist['SMA_50'] = full_hist['SMA_50'].loc[filtered_hist.index]
+    
+                    # 3. Render Chart
+                    st.subheader(f"📊 {pro_ticker.upper()} DETAILED ALGORITHMIC PROFILE ({window_selection})")
+                    st.line_chart(filtered_hist[['Close', 'SMA_50']])
+    
+                    # 4. Render Microstructure Metrics
+                    st.subheader("📄 DETAILED LIVE MICROSTRUCTURE DATA")
+                    m1, m2, m3, m4 = st.columns(4)
+                    m1.metric("Day High", f"${info.get('dayHigh', 0):,.2f}")
+                    m2.metric("Day Low", f"${info.get('dayLow', 0):,.2f}")
+                    m3.metric("Avg Volume (10d)", f"{info.get('averageDailyVolume10Day', 0):,}")
+                    m4.metric("Beta Coefficient", f"{info.get('beta', 'N/A')}")
+    
+                    st.divider()
+                    
+                    # 5. Risk & Breakout Layout
+                    col_risk, col_break = st.columns(2)
+    
+                    with col_risk:
+                        st.subheader("ASYMMETRIC RISK MATRIX")
+                        with st.container(border=True):
+                            st.markdown("""
+    | Allocation Vector | Target Yield | Tail Risk Stop | Risk-Reward Ratio |
+    | :--- | :--- | :--- | :--- |
+    | **Primary Momentum** | +24.50% | -6.20% | **3.95x** |
+    | **Asymmetric Hedge** | +12.00% | -2.50% | **4.80x** |
+    """)
+    
+                    with col_break:
+                        st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
+                        with st.container(border=True):
+                            st.markdown("""
+    | Resistance Level | Support Level | Breakout Trigger | Momentum Status |
+    | :--- | :--- | :--- | :--- |
+    | **R1: Pivot** | **S1: Core** | Aggressive | Bullish |
+    """)
+    
+                else:
+                    st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable. Please try another ticker or wait a moment.")
+    
+            except Exception as e:
+                st.error(f"⚠️ INTERFACE ERROR: {e}")
                            
                             
                     with col_break:
