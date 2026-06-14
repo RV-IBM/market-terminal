@@ -67,78 +67,67 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     
                     # 5. Risk & Breakout Layout
                     col_risk, col_break = st.columns(2)
-    
-                    with col_risk:
-                        st.subheader("ASYMMETRIC RISK MATRIX")
-                        with st.container(border=True):
-                            st.markdown("""
-    | Allocation Vector | Target Yield | Tail Risk Stop | Risk-Reward Ratio |
-    | :--- | :--- | :--- | :--- |
-    | **Primary Momentum** | +24.50% | -6.20% | **3.95x** |
-    | **Asymmetric Hedge** | +12.00% | -2.50% | **4.80x** |
-    """)
-    
-                    with col_break:
-                        st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
-                        with st.container(border=True):
-                            st.markdown("""
-    | Resistance Level | Support Level | Breakout Trigger | Momentum Status |
-    | :--- | :--- | :--- | :--- |
-    | **R1: Pivot** | **S1: Core** | Aggressive | Bullish |
-    """)
-    
-                else:
-                    st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable. Please try another ticker or wait a moment.")
-    
-            except Exception as e:
-                st.error(f"⚠️ INTERFACE ERROR: {e}")
-                           
-                            
-                    with col_break:
-                        st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
-                        with st.container(border=True):
-                            current_price = filtered_hist['Close'].iloc[-1]
-                            resistance = info.get('fiftyTwoWeekHigh', current_price * 1.05)
-                            support = filtered_hist['Close'].min()
-                            st.write(f" **Macro Resistance Ceiling:** `${resistance:,.2f}`")
-                            st.write(f" **Dynamic Baseline Support:** `${support:,.2f}`")
-                            st.write(f" **Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
 
-            # All blocks below are now indented to sit inside the 'else' block
-            except Exception as e:
-                st.error(f"Error fetching data: {e}")
+        with col_risk:
+            st.subheader("ASYMMETRIC RISK MATRIX")
+            with st.container(border=True):
+                st.markdown("""
+| Allocation Vector | Target Yield | Tail Risk Stop | Risk-Reward Ratio |
+| :--- | :--- | :--- | :--- |
+| **Primary Momentum** | +24.50% | -6.20% | **3.95x** |
+| **Asymmetric Hedge** | +12.00% | -2.50% | **4.80x** |
+""")
 
-        # The Button logic is now indented to sit inside the 'else' block
-        st.divider()
-        if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-            # Everything below here MUST be indented 12 spaces relative to the start of the line
-            info, hist = get_stock_data_func(pro_ticker, range_type="pro")
+        with col_break:
+            st.subheader("TECHNICAL BREAKOUT THRESHOLDS")
+            with st.container(border=True):
+                current_price = filtered_hist['Close'].iloc[-1]
+                resistance = info.get('fiftyTwoWeekHigh', current_price * 1.05)
+                support = filtered_hist['Close'].min()
+                st.write(f"**Macro Resistance Ceiling:** `${resistance:,.2f}`")
+                st.write(f"**Dynamic Baseline Support:** `${support:,.2f}`")
+                st.write(f"**Velocity Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
+
+    else:
+        st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable. Please try another ticker or wait a moment.")
+
+except Exception as e:
+    st.error(f"⚠️ INTERFACE ERROR: {e}")
+
+
+# ====================================================================
+# NEURAL VERDICT SECTION (Sits safely outside the upper telemetry block)
+# ====================================================================
+st.divider()
+
+if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
+    info, hist = get_stock_data_func(pro_ticker, range_type="pro")
+    
+    with st.spinner("Decoding Advanced Quant Telemetry..."):
+        url = st.secrets["PIPEDREAM_URL"]
+        
+        try:
+            res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
             
-            with st.spinner("Decoding Advanced Quant Telemetry..."):
-                url = st.secrets["PIPEDREAM_URL"]
-                
-                try:
-                    # Pro payload sent to Pipedream
-                    res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
+            if res.status_code == 200:
+                st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
+                with st.container(border=True):
+                    raw_prediction = res.json().get("prediction", "No telemetry data.")
+                    try:
+                        if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
+                            import ast
+                            parsed_dict = ast.literal_eval(raw_prediction)
+                            clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
+                        else:
+                            clean_output = str(raw_prediction)
+                    except:
+                        clean_output = str(raw_prediction)
                     
-                    if res.status_code == 200:
-                        st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
-                        with st.container(border=True):
-                            raw_prediction = res.json().get("prediction", "No telemetry data.")
-                            try:
-                                if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
-                                    import ast
-                                    parsed_dict = ast.literal_eval(raw_prediction)
-                                    clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
-                                else:
-                                    clean_output = str(raw_prediction)
-                            except:
-                                clean_output = str(raw_prediction)
-                            st.markdown(clean_output)
-                    else:
-                        st.error("NEURAL LINK FAILURE")
+                    st.markdown(clean_output)
+            else:
+                st.error("NEURAL LINK FAILURE")
                 
-                except requests.exceptions.Timeout:
-                    st.warning("📡 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
-                except requests.exceptions.RequestException:
-                    st.error("⚠️ PIPELINE ERROR: Interface gateway disconnected. Please check your network connection.")
+        except requests.exceptions.Timeout:
+            st.warning("TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
+        except requests.exceptions.RequestException:
+            st.error("⚠️ PIPELINE ERROR: Interface gateway disconnected. Please check your network connection.")
