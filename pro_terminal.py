@@ -113,16 +113,48 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
                             with st.container(border=True):
                                 raw_prediction = res.json().get("prediction", "No telemetry data.")
+                                # Initialize our final display string
+                                clean_output = ""
+                                
                                 try:
-                                    if isinstance(raw_prediction, str) and "candidates" in raw_prediction:
+                                    # If Pipedream sent back a double-serialized string, parse it into a dict
+                                    if isinstance(raw_prediction, str):
                                         import ast
                                         parsed_dict = ast.literal_eval(raw_prediction)
-                                        clean_output = parsed_dict["candidates"][0]["content"]["parts"][0]["text"]
+                                    else:
+                                        parsed_dict = raw_prediction
+                                    
+                                    # robust extraction targeting your specific JSON payload structure
+                                    if isinstance(parsed_dict, dict):
+                                        if "candidates" in parsed_dict and len(parsed_dict["candidates"]) > 0:
+                                            candidate = parsed_dict["candidates"][0]
+                                            
+                                            # Check standard nested structure
+                                            if "content" in candidate and "parts" in candidate["content"]:
+                                                clean_output = candidate["content"]["parts"][0]["text"]
+                                            # Check if it's flat inside the candidate (e.g., candidate['text'])
+                                            elif "text" in candidate:
+                                                clean_output = candidate["text"]
+                                            # Check if parts is flat inside the candidate
+                                            elif "parts" in candidate:
+                                                clean_output = candidate["parts"][0].get("text", str(candidate))
+                                            else:
+                                                # Fallback: Look for any key named 'text' or 'prediction' inside the dict
+                                                clean_output = parsed_dict.get("text", parsed_dict.get("output", str(raw_prediction)))
+                                        else:
+                                            clean_output = parsed_dict.get("text", str(parsed_dict))
                                     else:
                                         clean_output = str(raw_prediction)
-                                except:
+                                        
+                                except Exception as parse_err:
+                                    # Fallback if ast parsing completely chokes
                                     clean_output = str(raw_prediction)
                                 
+                                # Clean up literal newline characters if the payload escaped them as text
+                                if isinstance(clean_output, str):
+                                    clean_output = clean_output.replace("\\n", "\n")
+                                
+                                # Render clean markdown text onto the Streamlit UI
                                 st.markdown(clean_output)
                         else:
                             st.error("NEURAL LINK FAILURE")
