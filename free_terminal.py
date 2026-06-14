@@ -39,42 +39,20 @@ def render_free_terminal(get_stock_data_func):
                                 
                                 clean_output = ""
                                 
-                                # 2. Drill down and extract the text payload
+                                # 2. Drill down and extract the text payload safely
+                                # 2. Drill down and extract the text payload safely
+                                clean_output = ""
+                                
+                                # 2. Drill down and extract the text payload safely
                                 try:
                                     import json
+                                    import ast
+                                    
+                                    # Convert stringified JSON into a real dictionary
                                     if isinstance(raw_prediction, str):
                                         clean_str = raw_prediction.strip()
-                                        if clean_str.startswith("```json"):
-                                            clean_str = clean_str[7:-3]
-                                        elif clean_str.startswith("```"):
-                                            clean_str = clean_str[3:-3]
-                                        clean_str = clean_str.strip()
-                                        
-                                        try:
-                                            parsed_dict = json.loads(clean_str)
-                                        except:
-                                            parsed_dict = raw_prediction
-                                    else:
-                                        parsed_dict = raw_prediction
-                                    
-                                    # Extract inner text if wrapped in Gemini candidate structure
-                                    if isinstance(parsed_dict, dict):
-                                        if "candidates" in parsed_dict and len(parsed_dict["candidates"]) > 0:
-                                            candidate = parsed_dict["candidates"][0]
-                                            if "content" in candidate and "parts" in candidate["content"]:
-                                                clean_output = candidate["content"]["parts"][0]["text"]
-                                            elif "text" in candidate:
-                                                clean_output = candidate["text"]
-                                            else:
-                                                clean_output = parsed_dict.get("text", str(parsed_dict))
-                                        else:
-                                            clean_output = parsed_dict.get("text", parsed_dict.get("output", str(raw_prediction)))
-                                    else:
-                                        clean_output = str(raw_prediction)
-                                        
-                                except Exception as e:
-                                    clean_output = str(raw_prediction)
-                                
+                                        if clean_str.startswith("http://googleusercontent.com/immersive_entry_chip/0", "http://googleusercontent.com/immersive_entry_chip/1")
+
                                 # 3. Final visual formatting
                                 if isinstance(clean_output, str):
                                     clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
