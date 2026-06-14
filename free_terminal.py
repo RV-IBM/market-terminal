@@ -69,11 +69,20 @@ def render_free_terminal(get_stock_data_func):
                         except Exception as e:
                             clean_output = str(raw_prediction)
                         
-                        # 4. Final text cleanup for Streamlit markdown formatting
-                        if isinstance(clean_output, str):
-                            clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
+                       # 4. Final text cleanup for Streamlit markdown formatting
+                    if isinstance(clean_output, str):
+                        clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
                         
-                        st.markdown(clean_output)
+                        # --- NEW: SCRUB THOUGHT SIGNATURES ---
+                        import re
+                        # This finds <think>...</think> and erases everything inside it
+                        clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL)
+                        
+                        # Clean up any leftover empty space at the top
+                        clean_output = clean_output.strip()
+                    
+                    # Render the final, polished output
+                    st.markdown(clean_output)
                 else:
                     st.error("NEURAL LINK FAILURE")
                     
