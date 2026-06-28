@@ -44,75 +44,75 @@ def render_free_terminal(get_stock_data_func):
                                 
                                 # 2. Drill down and extract the text payload safely
                                 try:
-                                import json
-                                import ast
-                                
-                                # Convert stringified JSON into a real dictionary
-                                if isinstance(raw_prediction, str):
-                                    clean_str = raw_prediction.strip()
-                                    if clean_str.startswith("```json"):
-                                        clean_str = clean_str[7:-3]
-                                    elif clean_str.startswith("```"):
-                                        clean_str = clean_str[3:-3]
-                                    clean_str = clean_str.strip()
+                                    import json
+                                    import ast
                                     
-                                    try:
-                                        parsed_dict = json.loads(clean_str)
-                                    except:
+                                    # Convert stringified JSON into a real dictionary
+                                    if isinstance(raw_prediction, str):
+                                        clean_str = raw_prediction.strip()
+                                        if clean_str.startswith("```json"):
+                                            clean_str = clean_str[7:-3]
+                                        elif clean_str.startswith("```"):
+                                            clean_str = clean_str[3:-3]
+                                        clean_str = clean_str.strip()
+                                        
                                         try:
-                                            parsed_dict = ast.literal_eval(clean_str)
+                                            parsed_dict = json.loads(clean_str)
                                         except:
-                                            parsed_dict = raw_prediction
-                                else:
-                                    parsed_dict = raw_prediction
-
-                                # Extract inner text if wrapped in Gemini candidate structure
-                                if isinstance(parsed_dict, dict):
-                                    if "candidates" in parsed_dict and len(parsed_dict["candidates"]) > 0:
-                                        candidate = parsed_dict["candidates"][0]
-                                        if "content" in candidate and "parts" in candidate["content"]:
-                                            clean_output = candidate["content"]["parts"][0]["text"]
-                                        elif "text" in candidate:
-                                            clean_output = candidate["text"]
-                                        else:
-                                            clean_output = parsed_dict.get("text", str(parsed_dict))
+                                            try:
+                                                parsed_dict = ast.literal_eval(clean_str)
+                                            except:
+                                                parsed_dict = raw_prediction
                                     else:
-                                        clean_output = parsed_dict.get("text", parsed_dict.get("output", str(raw_prediction)))
-                                else:
+                                        parsed_dict = raw_prediction
+    
+                                    # Extract inner text if wrapped in Gemini candidate structure
+                                    if isinstance(parsed_dict, dict):
+                                        if "candidates" in parsed_dict and len(parsed_dict["candidates"]) > 0:
+                                            candidate = parsed_dict["candidates"][0]
+                                            if "content" in candidate and "parts" in candidate["content"]:
+                                                clean_output = candidate["content"]["parts"][0]["text"]
+                                            elif "text" in candidate:
+                                                clean_output = candidate["text"]
+                                            else:
+                                                clean_output = parsed_dict.get("text", str(parsed_dict))
+                                        else:
+                                            clean_output = parsed_dict.get("text", parsed_dict.get("output", str(raw_prediction)))
+                                    else:
+                                        clean_output = str(raw_prediction)
+                                        
+                                except Exception as e:
                                     clean_output = str(raw_prediction)
+    
+                                # 3. Final visual formatting
+                                if isinstance(clean_output, str):
+                                    clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
                                     
-                            except Exception as e:
-                                clean_output = str(raw_prediction)
-
-                            # 3. Final visual formatting
-                            if isinstance(clean_output, str):
-                                clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
-                                
-                                # Scrub out <think> tags from reasoning models
-                                import re
-                                clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
-                                
-                                # --- NEW: SMART JSON DETECTOR ---
-                                # If the AI returned pure JSON text, render it as a clean UI block
-                                if clean_output.startswith("{") and clean_output.endswith("}"):
-                                    try:
-                                        json_obj = json.loads(clean_output)
-                                        st.json(json_obj) # This makes it beautifully color-coded and collapsible
-                                    except:
-                                        st.markdown(f"```json\n{clean_output}\n```")
+                                    # Scrub out <think> tags from reasoning models
+                                    import re
+                                    clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+                                    
+                                    # --- NEW: SMART JSON DETECTOR ---
+                                    # If the AI returned pure JSON text, render it as a clean UI block
+                                    if clean_output.startswith("{") and clean_output.endswith("}"):
+                                        try:
+                                            json_obj = json.loads(clean_output)
+                                            st.json(json_obj) # This makes it beautifully color-coded and collapsible
+                                        except:
+                                            st.markdown(f"```json\n{clean_output}\n```")
+                                    else:
+                                        st.markdown(clean_output)
                                 else:
-                                    st.markdown(clean_output)
-                            else:
-                                st.write(clean_output)
-                                
-                    else:
-                        st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
-                        
-                except requests.exceptions.Timeout:
-                    st.warning("🦤 TELEMETRY DELAY: Matrix generation took longer than 45 seconds. Please click again to retry.")
-                except requests.exceptions.RequestException as e:
-                    st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
-                
+                                    st.write(clean_output)
+                                    
+                        else:
+                            st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
+                            
+                    except requests.exceptions.Timeout:
+                        st.warning("🦤 TELEMETRY DELAY: Matrix generation took longer than 45 seconds. Please click again to retry.")
+                    except requests.exceptions.RequestException as e:
+                        st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
+                    
                 # ==========================================================
                 # RESTORED: THE CHART AND STATS RENDERING!
                 # ==========================================================
