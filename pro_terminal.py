@@ -9,12 +9,13 @@ from datetime import datetime, timedelta
 
 def render_pro_terminal(is_premium, get_stock_data_func):
     # ==========================================
-    # ACCESS CONTROL
+    # ACCESS CONTROL (UI CONSISTENCY)
     # ==========================================
     if not is_premium:
+        # Reverting to the clean layout structure observed in image_6e35eb.png
         st.markdown("""
-        <div class="lock-box">
-            <h1 style='color: #ff3333 !important; text-shadow: 0 0 10px #ff3333;'>🔒 ACCESS DENIED: LEVEL 2 CLEARANCE REQUIRED</h1>
+        <div style="border: 2px dashed #ff3333; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <h1 style='color: #00e5ff; font-family: monospace;'>🔒 ACCESS DENIED: LEVEL 2 CLEARANCE REQUIRED</h1>
         </div>
         """, unsafe_allow_html=True)
         st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
@@ -61,7 +62,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                 curr_price = filtered_hist['Close'].iloc[-1]
                 m1.metric("Day High", f"${info.get('dayHigh', curr_price):,.2f}")
                 m2.metric("Day Low", f"${info.get('dayLow', curr_price):,.2f}")
-                m3.metric("Avg Volume", f"{info.get('averageDailyVolume10Day', 0):,}")
+                m3.metric("Avg Volume (10d)", f"{info.get('averageDailyVolume10Day', 0):,}")
                 m4.metric("Beta", f"{info.get('beta', 1.0):.2f}")
                 
                 st.divider()
@@ -103,7 +104,6 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
             with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
                 try:
-                    # Pipedream API Integration
                     url = st.secrets.get("PIPEDREAM_URL", "")
                     if url:
                         res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
@@ -111,7 +111,6 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     else:
                         raw_prediction = "{'error': 'Missing API Key'}"
                     
-                    # Robust Parsing Engine
                     clean_output = re.sub(r'<think>.*?</think>', '', str(raw_prediction), flags=re.DOTALL).strip()
                     
                     def cyber_highlight(text):
