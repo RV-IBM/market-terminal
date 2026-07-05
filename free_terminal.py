@@ -88,57 +88,47 @@ def render_free_terminal(get_stock_data_func):
                                 if isinstance(clean_output, str):
                                     clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
                                     
-                                    # Scrub out <think> tags from reasoning models
+                                    # Scrub out reasoning chains
                                     import re
                                     clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
                                     
-                                    # --- SMART JSON DETECTOR & PREMIUM DASHBOARD ---
+                                    # Smart JSON Detector & Cyber Dashboard Engine
                                     if clean_output.startswith("{") and clean_output.endswith("}"):
                                         try:
                                             json_obj = json.loads(clean_output)
                                             
-                                            # If Pipedream returned our structured intelligence payload
-                                            if "alpha_gen_intelligence" in json_obj:
-                                                data = json_obj["alpha_gen_intelligence"]
-                                                
-                                                st.markdown(f"### 🧠 Neural Analysis: {data.get('ticker', 'Unknown').upper()}")
-                                                
-                                                # Dynamic Outlook Badge
-                                                outlook = data.get('outlook_30d', 'Neutral')
-                                                if "Bullish" in outlook:
-                                                    st.success(f"**30-Day Outlook:** {outlook} 🚀")
-                                                elif "Bearish" in outlook:
-                                                    st.error(f"**30-Day Outlook:** {outlook} 🔻")
-                                                else:
-                                                    st.warning(f"**30-Day Outlook:** {outlook} ⚖️")
-                                                
-                                                # Support, Resistance, and Confidence Metrics
-                                                quant = data.get("quantitative_trend_telemetry", {})
-                                                sr = quant.get("support_resistance", {})
-                                                exec_data = data.get("strategic_execution", {})
-                                                
-                                                col1, col2, col3 = st.columns(3)
-                                                col1.metric("🛡️ Primary Support", f"${sr.get('primary_support', 'N/A')}")
-                                                col2.metric("🎯 Primary Resistance", f"${sr.get('primary_resistance', 'N/A')}")
-                                                col3.metric("🤖 AI Confidence", f"{exec_data.get('confidence_score', 'N/A')}%")
-                                                
-                                                # Detailed Expandable Sections
-                                                with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
-                                                    st.markdown("**Delta Summary**")
-                                                    st.info(quant.get("delta_summary", "N/A"))
-                                                    st.markdown("**Volatility Profile**")
-                                                    st.warning(quant.get("volatility_profile", "N/A"))
-                                                    
-                                                with st.expander("🌐 Contextual Intelligence", expanded=True):
-                                                    st.write(data.get("contextual_intelligence", "N/A"))
-                                                    
-                                                if "neural_signature" in exec_data:
-                                                    st.caption(f"Neural Signature: `{exec_data.get('neural_signature')}`")
-                                            else:
-                                                # Fallback to standard color-coded JSON if structure is different
-                                                st.json(json_obj)
-                                        except Exception as e:
-                                            # Markdown fallback if JSON parsing fails
+                                            # Cyber highlight engine
+                                            def cyber_highlight(text):
+                                                if not isinstance(text, str): return str(text)
+                                                pos = ["growth", "support", "bullish", "profit", "rebound", "upward", "gain", "recovery", "fair-value", "buy", "surge", "uptrend"]
+                                                neg = ["loss", "resistance", "bearish", "contraction", "breakdown", "downward", "low", "sell", "pressure", "negative", "downtrend", "risk"]
+                                                for word in pos:
+                                                    text = re.sub(rf'\b({word})\b', r'<span style="color: #00ff9d; font-weight: bold; text-shadow: 0 0 5px rgba(0,255,157,0.4);">\1</span>', text, flags=re.IGNORECASE)
+                                                for word in neg:
+                                                    text = re.sub(rf'\b({word})\b', r'<span style="color: #ff3366; font-weight: bold; text-shadow: 0 0 5px rgba(255,51,102,0.4);">\1</span>', text, flags=re.IGNORECASE)
+                                                return text
+    
+                                            # Extract data for cards (simplified for concise output)
+                                            data = json_obj.get("alpha_gen_intelligence", {})
+                                            telemetry = data.get("quantitative_trend_telemetry", {})
+                                            sr = telemetry.get("support_resistance", {})
+                                            
+                                            dashboard_html = f"""
+                                            <div style="background: #020c1b; border: 1px solid #172a45; border-radius: 12px; padding: 20px; font-family: monospace; color: #8892b0;">
+                                                <h3 style="color: #64ffda; margin-top: 0;"> NEURAL INTELLIGENCE</h3>
+                                                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                                                    <div style="background: #0a192f; padding: 10px; border-radius: 8px; border-left: 3px solid #00f3ff;">
+                                                        <small style="color: #00f3ff;">OUTLOOK</small><br><strong>{data.get('outlook_30d', 'Neutral')}</strong>
+                                                    </div>
+                                                    <div style="background: #0a192f; padding: 10px; border-radius: 8px; border-left: 3px solid #00ff9d;">
+                                                        <small style="color: #00ff9d;">SUPPORT</small><br><strong>{sr.get('primary_support', 'N/A')}</strong>
+                                                    </div>
+                                                </div>
+                                                <p style="font-size: 14px;">{cyber_highlight(data.get('contextual_intelligence', ''))}</p>
+                                            </div>
+                                            """
+                                            st.markdown(dashboard_html, unsafe_allow_html=True)
+                                        except:
                                             st.markdown(f"```json\n{clean_output}\n```")
                                     else:
                                         st.markdown(clean_output)
