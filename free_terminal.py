@@ -147,9 +147,6 @@ def render_free_terminal(get_stock_data_func):
                                     
                         else:
                             st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
-                                    
-                        else:
-                            st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
                             
                     except requests.exceptions.Timeout:
                         st.warning("🦤 TELEMETRY DELAY: Matrix generation took longer than 45 seconds. Please click again to retry.")
