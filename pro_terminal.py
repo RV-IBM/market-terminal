@@ -174,94 +174,94 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     else:
                         st.warning(f"⚠️ SYSTEM NOTIFICATION: Live telemetry for {pro_ticker} is temporarily unavailable.")
                 
-                except Exception as e:
-                    st.error(f"⚠️ INTERFACE ERROR: {str(e)}")
-
-                st.divider()
-
-                # ==========================================================
-                # PRO NEURAL VERDICT EXECUTION
-                # ==========================================================
-                if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-                    with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
-                        try:
-                            # Using Streamlit secrets for Pipedream
-                            url = st.secrets["PIPEDREAM_URL"]
-                            res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
-                            
-                            if res.status_code == 200:
-                                st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
-                                raw_prediction = res.json().get("prediction", "No telemetry data.")
+                    except Exception as e:
+                        st.error(f"⚠️ INTERFACE ERROR: {str(e)}")
+    
+                    st.divider()
+    
+                    # ==========================================================
+                    # PRO NEURAL VERDICT EXECUTION
+                    # ==========================================================
+                    if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
+                        with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
+                            try:
+                                # Using Streamlit secrets for Pipedream
+                                url = st.secrets["PIPEDREAM_URL"]
+                                res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
                                 
-                                clean_output = str(raw_prediction).replace("\\n", "\n").replace("\\\"", "\"")
-                                
-                                import re, ast, json
-                                # Clean reasoning tags
-                                clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
-                                
-                                # Highlight function (added more pro terms based on output!)
-                                def cyber_highlight(text):
-                                    if not isinstance(text, str): return str(text)
-                                    text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum|resilience|recovery|positive)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
-                                    text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown|drawdown|distribution)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
-                                    return text
-                                
-                                # 7. INTELLIGENT PARSER (Fixes the single-quote bug!)
-                                json_obj = None
-                                if "{" in clean_output:
-                                    try:
-                                        start = clean_output.find("{")
-                                        end = clean_output.rfind("}") + 1
-                                        bracketed_text = clean_output[start:end]
-                                        
+                                if res.status_code == 200:
+                                    st.success("⚡ PRO LEVEL NEURAL LINK ESTABLISHED")
+                                    raw_prediction = res.json().get("prediction", "No telemetry data.")
+                                    
+                                    clean_output = str(raw_prediction).replace("\\n", "\n").replace("\\\"", "\"")
+                                    
+                                    import re, ast, json
+                                    # Clean reasoning tags
+                                    clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+                                    
+                                    # Highlight function (added more pro terms based on output!)
+                                    def cyber_highlight(text):
+                                        if not isinstance(text, str): return str(text)
+                                        text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum|resilience|recovery|positive)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
+                                        text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown|drawdown|distribution)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
+                                        return text
+                                    
+                                    # 7. INTELLIGENT PARSER (Fixes the single-quote bug!)
+                                    json_obj = None
+                                    if "{" in clean_output:
                                         try:
-                                            # Try standard JSON first
-                                            json_obj = json.loads(bracketed_text)
+                                            start = clean_output.find("{")
+                                            end = clean_output.rfind("}") + 1
+                                            bracketed_text = clean_output[start:end]
+                                            
+                                            try:
+                                                # Try standard JSON first
+                                                json_obj = json.loads(bracketed_text)
+                                            except:
+                                                # THE FIX: If it's a Python dict string with single quotes, AST evaluates it perfectly!
+                                                json_obj = ast.literal_eval(bracketed_text)
                                         except:
-                                            # THE FIX: If it's a Python dict string with single quotes, AST evaluates it perfectly!
-                                            json_obj = ast.literal_eval(bracketed_text)
-                                    except:
-                                        json_obj = None
-                                
-                                # 8. PRO CYBER DASHBOARD RENDERER
-                                if json_obj and isinstance(json_obj, dict):
-                                    dashboard_html = """
-                                    <style>
-                                        .cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', Courier, monospace;}
-                                        .cyber-title { color: #00e5ff; font-size: 1.1em; font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
-                                        .cyber-key { color: #8892b0; font-weight: bold; font-size: 0.9em; text-transform: capitalize;}
-                                        .cyber-value { color: #e2e8f0; font-size: 0.95em; margin-bottom: 10px; display: block; line-height: 1.6;}
-                                    </style>
-                                    <div style="padding: 10px 0;">
-                                    """
-                                    def build_html(obj):
-                                        html = ""
-                                        if isinstance(obj, dict):
-                                            for k, v in obj.items():
-                                                # Clean up underscores in keys (e.g., 'outlook_30d' -> 'outlook 30d')
-                                                clean_k = str(k).replace("_", " ")
-                                                if isinstance(v, (dict, list)):
-                                                    html += f"<div class='cyber-card'><div class='cyber-title'>{clean_k}</div>{build_html(v)}</div>"
-                                                else:
-                                                    html += f"<div><span class='cyber-key'>{clean_k}: </span><span class='cyber-value'>{cyber_highlight(str(v))}</span></div>"
-                                        elif isinstance(obj, list):
-                                            for item in obj:
-                                                html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
-                                        else:
-                                            html += f"<span class='cyber-value'>{cyber_highlight(str(obj))}</span>"
-                                        return html
-                                        
-                                    dashboard_html += build_html(json_obj) + "</div>"
-                                    st.markdown(dashboard_html, unsafe_allow_html=True)
+                                            json_obj = None
+                                    
+                                    # 8. PRO CYBER DASHBOARD RENDERER
+                                    if json_obj and isinstance(json_obj, dict):
+                                        dashboard_html = """
+                                        <style>
+                                            .cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', Courier, monospace;}
+                                            .cyber-title { color: #00e5ff; font-size: 1.1em; font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
+                                            .cyber-key { color: #8892b0; font-weight: bold; font-size: 0.9em; text-transform: capitalize;}
+                                            .cyber-value { color: #e2e8f0; font-size: 0.95em; margin-bottom: 10px; display: block; line-height: 1.6;}
+                                        </style>
+                                        <div style="padding: 10px 0;">
+                                        """
+                                        def build_html(obj):
+                                            html = ""
+                                            if isinstance(obj, dict):
+                                                for k, v in obj.items():
+                                                    # Clean up underscores in keys (e.g., 'outlook_30d' -> 'outlook 30d')
+                                                    clean_k = str(k).replace("_", " ")
+                                                    if isinstance(v, (dict, list)):
+                                                        html += f"<div class='cyber-card'><div class='cyber-title'>{clean_k}</div>{build_html(v)}</div>"
+                                                    else:
+                                                        html += f"<div><span class='cyber-key'>{clean_k}: </span><span class='cyber-value'>{cyber_highlight(str(v))}</span></div>"
+                                            elif isinstance(obj, list):
+                                                for item in obj:
+                                                    html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
+                                            else:
+                                                html += f"<span class='cyber-value'>{cyber_highlight(str(obj))}</span>"
+                                            return html
+                                            
+                                        dashboard_html += build_html(json_obj) + "</div>"
+                                        st.markdown(dashboard_html, unsafe_allow_html=True)
+                                    else:
+                                        # Formatted fallback with easier readability
+                                        fallback_html = f"<div style='background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; font-family: \"Courier New\", Courier, monospace; color: #e2e8f0; line-height: 1.7; font-size: 1.05em;'>{cyber_highlight(clean_output)}</div>"
+                                        st.markdown(fallback_html, unsafe_allow_html=True)
+    
                                 else:
-                                    # Formatted fallback with easier readability
-                                    fallback_html = f"<div style='background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; font-family: \"Courier New\", Courier, monospace; color: #e2e8f0; line-height: 1.7; font-size: 1.05em;'>{cyber_highlight(clean_output)}</div>"
-                                    st.markdown(fallback_html, unsafe_allow_html=True)
-
-                            else:
-                                st.error(f"NEURAL LINK FAILURE: Status {res.status_code}")
-                                
-                        except requests.exceptions.Timeout:
-                            st.warning("🦤 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds.")
-                        except requests.exceptions.RequestException as e:
-                            st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
+                                    st.error(f"NEURAL LINK FAILURE: Status {res.status_code}")
+                                    
+                            except requests.exceptions.Timeout:
+                                st.warning("🦤 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds.")
+                            except requests.exceptions.RequestException as e:
+                                st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
