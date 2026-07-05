@@ -1,6 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
+import yfinance as yf
+import re
+import json
+import ast
 from datetime import datetime, timedelta
 
 def render_pro_terminal(is_premium, get_stock_data_func):
@@ -30,14 +34,13 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         try:
             info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
             
+            # Robust fallback for ticker data
             if full_hist is None or full_hist.empty:
-                import yfinance as yf
                 t = yf.Ticker(pro_ticker)
                 full_hist = t.history(period="1y")
-                info = t.info
+                info = t.info if t.info else {}
 
             if full_hist is not None and not full_hist.empty:
-                # 1. Date Filtering
                 last_date = full_hist.index.max()
                 if window_selection == "90 Days":
                     filtered_hist = full_hist[full_hist.index >= (last_date - timedelta(days=90))]
@@ -48,41 +51,29 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                 else:
                     filtered_hist = full_hist.copy()
 
-                # 2. Render Chart
-                st.subheader(f"{pro_ticker.upper()} ALGORITHMIC PROFILE")
+                # Render Charts
+                st.subheader(f"📊 {pro_ticker.upper()} DETAILED ALGORITHMIC PROFILE")
                 st.line_chart(filtered_hist['Close'])
 
-                # 3. Dynamic Live Microstructure Metrics (Replacing potential filler with formatted data)
-                st.subheader("LIVE MICROSTRUCTURE DATA")
+                st.subheader("📄 DETAILED LIVE MICROSTRUCTURE DATA")
                 m1, m2, m3, m4 = st.columns(4)
                 
-                # Use current price from the latest data point
                 curr_price = filtered_hist['Close'].iloc[-1]
-                day_high = info.get('dayHigh') or filtered_hist['High'].max()
-                day_low = info.get('dayLow') or filtered_hist['Low'].min()
-                vol = info.get('averageVolume') or 0
-                beta = info.get('beta') or 1.0
-
-                m1.metric("Day High", f"${day_high:,.2f}")
-                m2.metric("Day Low", f"${day_low:,.2f}")
-                m3.metric("Avg Volume", f"{vol:,}")
-                m4.metric("Beta", f"{beta:.2f}")
+                m1.metric("Day High", f"${info.get('dayHigh', curr_price):,.2f}")
+                m2.metric("Day Low", f"${info.get('dayLow', curr_price):,.2f}")
+                m3.metric("Avg Volume", f"{info.get('averageDailyVolume10Day', 0):,}")
+                m4.metric("Beta", f"{info.get('beta', 1.0):.2f}")
                 
                 st.divider()
                 
-                # 4. DYNAMIC RISK MATRIX (Replacing static table with live logic)
                 col_risk, col_break = st.columns(2)
                 with col_risk:
                     st.subheader("ASYMMETRIC RISK MATRIX")
                     
-                    # Logic: Target Upside = (Target Price - Current Price) / Current Price
                     target_price = info.get('targetMeanPrice') or (curr_price * 1.15)
                     upside = ((target_price - curr_price) / curr_price) * 100
-                    
-                    # Logic: Risk = (Current Price - 52W Low) / Current Price
                     fifty_two_low = info.get('fiftyTwoWeekLow') or (curr_price * 0.8)
                     risk = ((curr_price - fifty_two_low) / curr_price) * 100
-                    
                     ratio = abs(upside / risk) if risk != 0 else 0
 
                     st.markdown(f"""
@@ -102,20 +93,60 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     st.write(f"**Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
 
             else:
-                st.warning(f"Live telemetry for {pro_ticker} unavailable.")
+                st.warning(f"⚠️ Live telemetry for {pro_ticker} unavailable.")
         
         except Exception as e:
-            st.error(f"INTERFACE ERROR: {str(e)}")
+            st.error(f"⚠️ INTERFACE ERROR: {str(e)}")
 
         st.divider()
 
-        # ==========================================================
-        # PRO NEURAL VERDICT EXECUTION
-        # ==========================================================
         if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-            with st.spinner("Processing..."):
+            with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
                 try:
-                    # Logic for API call remains...
-                    pass
+                    # Pipedream API Integration
+                    url = st.secrets.get("PIPEDREAM_URL", "")
+                    if url:
+                        res = requests.post(url, json={"ticker": pro_ticker, "tier": "pro"}, timeout=45)
+                        raw_prediction = res.json().get("prediction", "No data.") if res.status_code == 200 else "Link Failure"
+                    else:
+                        raw_prediction = "{'error': 'Missing API Key'}"
+                    
+                    # Robust Parsing Engine
+                    clean_output = re.sub(r'<think>.*?</think>', '', str(raw_prediction), flags=re.DOTALL).strip()
+                    
+                    def cyber_highlight(text):
+                        if not isinstance(text, str): return str(text)
+                        text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
+                        text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
+                        return text
+
+                    json_obj = None
+                    if "{" in clean_output:
+                        try:
+                            start, end = clean_output.find("{"), clean_output.rfind("}") + 1
+                            json_obj = ast.literal_eval(clean_output[start:end])
+                        except:
+                            json_obj = None
+                    
+                    if isinstance(json_obj, dict):
+                        dashboard_html = "<style>.cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', monospace; line-height: 1.6;}</style><div style='padding: 10px 0;'>"
+                        def build_html(obj):
+                            html = ""
+                            if isinstance(obj, dict):
+                                for k, v in obj.items():
+                                    clean_k = str(k).replace("_", " ").title()
+                                    if isinstance(v, (dict, list)):
+                                        html += f"<div class='cyber-card'><div style='color: #00e5ff; font-weight: bold; border-bottom: 1px solid #1e293b; margin-bottom: 10px;'>{clean_k}</div>{build_html(v)}</div>"
+                                    else:
+                                        html += f"<div><span style='color: #8892b0; font-weight: bold;'>{clean_k}: </span><span style='color: #e2e8f0;'>{cyber_highlight(str(v))}</span></div>"
+                            elif isinstance(obj, list):
+                                for item in obj: html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
+                            else:
+                                html += f"<span style='color: #e2e8f0;'>{cyber_highlight(str(obj))}</span>"
+                            return html
+                        st.markdown(dashboard_html + build_html(json_obj) + "</div>", unsafe_allow_html=True)
+                    else:
+                        st.markdown(f"<div style='background: #0a0e17; padding: 20px; color: #e2e8f0; font-family: monospace;'>{cyber_highlight(clean_output)}</div>", unsafe_allow_html=True)
+                
                 except Exception as e:
                     st.error(f"Pipeline error: {e}")
