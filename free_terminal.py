@@ -84,7 +84,7 @@ def render_free_terminal(get_stock_data_func):
                                 except Exception as e:
                                     clean_output = str(raw_prediction)
     
-                                # 3. Final visual formatting
+                                    # 3. Final visual formatting
                                 if isinstance(clean_output, str):
                                     clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
                                     
@@ -92,18 +92,61 @@ def render_free_terminal(get_stock_data_func):
                                     import re
                                     clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
                                     
-                                    # --- NEW: SMART JSON DETECTOR ---
-                                    # If the AI returned pure JSON text, render it as a clean UI block
+                                    # --- SMART JSON DETECTOR & PREMIUM DASHBOARD ---
                                     if clean_output.startswith("{") and clean_output.endswith("}"):
                                         try:
                                             json_obj = json.loads(clean_output)
-                                            st.json(json_obj) # This makes it beautifully color-coded and collapsible
-                                        except:
+                                            
+                                            # If Pipedream returned our structured intelligence payload
+                                            if "alpha_gen_intelligence" in json_obj:
+                                                data = json_obj["alpha_gen_intelligence"]
+                                                
+                                                st.markdown(f"### 🧠 Neural Analysis: {data.get('ticker', 'Unknown').upper()}")
+                                                
+                                                # Dynamic Outlook Badge
+                                                outlook = data.get('outlook_30d', 'Neutral')
+                                                if "Bullish" in outlook:
+                                                    st.success(f"**30-Day Outlook:** {outlook} 🚀")
+                                                elif "Bearish" in outlook:
+                                                    st.error(f"**30-Day Outlook:** {outlook} 🔻")
+                                                else:
+                                                    st.warning(f"**30-Day Outlook:** {outlook} ⚖️")
+                                                
+                                                # Support, Resistance, and Confidence Metrics
+                                                quant = data.get("quantitative_trend_telemetry", {})
+                                                sr = quant.get("support_resistance", {})
+                                                exec_data = data.get("strategic_execution", {})
+                                                
+                                                col1, col2, col3 = st.columns(3)
+                                                col1.metric("🛡️ Primary Support", f"${sr.get('primary_support', 'N/A')}")
+                                                col2.metric("🎯 Primary Resistance", f"${sr.get('primary_resistance', 'N/A')}")
+                                                col3.metric("🤖 AI Confidence", f"{exec_data.get('confidence_score', 'N/A')}%")
+                                                
+                                                # Detailed Expandable Sections
+                                                with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
+                                                    st.markdown("**Delta Summary**")
+                                                    st.info(quant.get("delta_summary", "N/A"))
+                                                    st.markdown("**Volatility Profile**")
+                                                    st.warning(quant.get("volatility_profile", "N/A"))
+                                                    
+                                                with st.expander("🌐 Contextual Intelligence", expanded=True):
+                                                    st.write(data.get("contextual_intelligence", "N/A"))
+                                                    
+                                                if "neural_signature" in exec_data:
+                                                    st.caption(f"Neural Signature: `{exec_data.get('neural_signature')}`")
+                                            else:
+                                                # Fallback to standard color-coded JSON if structure is different
+                                                st.json(json_obj)
+                                        except Exception as e:
+                                            # Markdown fallback if JSON parsing fails
                                             st.markdown(f"```json\n{clean_output}\n```")
                                     else:
                                         st.markdown(clean_output)
                                 else:
                                     st.write(clean_output)
+                                    
+                        else:
+                            st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
                                     
                         else:
                             st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
