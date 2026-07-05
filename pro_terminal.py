@@ -147,17 +147,81 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                                         clean_output = str(raw_prediction)
                                         
                                 except Exception as parse_err:
-                                    # Fallback if ast parsing completely chokes
-                                    clean_output = str(raw_prediction)
-                                
-                                # Clean up literal newline characters if the payload escaped them as text
-                                if isinstance(clean_output, str):
-                                    clean_output = clean_output.replace("\\n", "\n")
-                                
-                                # Render clean markdown text onto the Streamlit UI
-                                st.markdown(clean_output)
-                        else:
-                            st.error("NEURAL LINK FAILURE")
+            # Fallback if ast parsing completely chokes
+            clean_output = str(raw_prediction)
+
+        # ---------------------------------------------------------
+        # NEW PRO CYBER DASHBOARD RENDERING ENGINE
+        # ---------------------------------------------------------
+        if isinstance(clean_output, str):
+            clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
+            
+            import re
+            # Scrub reasoning models <think> tags if they exist
+            clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+            
+            # TEXT COLORIZATION ENGINE
+            def cyber_highlight(text):
+                if not isinstance(text, str):
+                    return str(text)
+                # Neon Green for positive market sentiment
+                text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
+                # Neon Red for negative market sentiment
+                text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
+                return text
+
+            # SMART JSON DETECTOR (Failsafe for cut-off AI responses)
+            import json
+            json_obj = None
+            
+            if "{" in clean_output:
+                try:
+                    start_idx = clean_output.find("{")
+                    end_idx = clean_output.rfind("}") + 1
+                    possible_json = clean_output[start_idx:end_idx]
+                    json_obj = json.loads(possible_json)
+                except:
+                    # If JSON is cut off mid-sentence, this catches the crash
+                    json_obj = None
+
+            # RENDER THE PREMIUM BLACK/BLUE UI
+            if json_obj:
+                dashboard_html = """
+                <style>
+                    .cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', Courier, monospace;}
+                    .cyber-title { color: #00e5ff; font-size: 1.1em; font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
+                    .cyber-key { color: #8892b0; font-weight: bold; font-size: 0.9em;}
+                    .cyber-value { color: #e2e8f0; font-size: 0.95em; margin-bottom: 10px; display: block;}
+                </style>
+                <div style="padding: 10px 0;">
+                """
+                
+                # Recursively build cards for nested data
+                def build_html(obj):
+                    html = ""
+                    if isinstance(obj, dict):
+                        for k, v in obj.items():
+                            if isinstance(v, (dict, list)):
+                                html += f"<div class='cyber-card'><div class='cyber-title'>{k}</div>{build_html(v)}</div>"
+                            else:
+                                html += f"<div><span class='cyber-key'>{k}: </span><span class='cyber-value'>{cyber_highlight(str(v))}</span></div>"
+                    elif isinstance(obj, list):
+                        for item in obj:
+                            html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
+                    else:
+                        html += f"<span class='cyber-value'>{cyber_highlight(str(obj))}</span>"
+                    return html
+                
+                dashboard_html += build_html(json_obj) + "</div>"
+                st.markdown(dashboard_html, unsafe_allow_html=True)
+            else:
+                # If the AI response was pure text or cut off severely, render it safely with highlights
+                fallback_html = f"<div style='background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; font-family: \"Courier New\", Courier, monospace; color: #e2e8f0;'>{cyber_highlight(clean_output)}</div>"
+                st.markdown(fallback_html, unsafe_allow_html=True)
+        else:
+            st.write(clean_output)
+    else:
+        st.error("NEURAL LINK FAILURE")
                             
                     except requests.exceptions.Timeout:
                         st.warning("🦤 TELEMETRY DELAY: Complex matrix generation took longer than 45 seconds. Please click again to retry.")
