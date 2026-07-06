@@ -7,7 +7,7 @@ from pro_terminal import render_pro_terminal
 
 # 1. PAGE CONFIG & GLOBAL HEX STYLING
 # Preserving your complete aesthetic, including the neon grid SVG and glowing effects.
-st.set_page_config(page_title="ALPHA-TERMINAL", layout="wide")
+st.set_page_config(page_title="SOAR Markets", layout="wide")
 
 st.markdown("""
     <style>
