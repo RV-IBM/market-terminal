@@ -24,7 +24,7 @@ def render_free_terminal(get_stock_data_func):
                         res = requests.post(url, json={"ticker": ticker, "tier": "free"}, timeout=45)
                         
                         if res.status_code == 200:
-                            st.success("⚡ STANDARD LEVEL NEURAL LINK ESTABLISHED")
+                            st.success("STANDARD LEVEL NEURAL LINK ESTABLISHED")
                             with st.container(border=True):
                                 
                                 # 1. Catch raw response safely
@@ -139,7 +139,7 @@ def render_free_terminal(get_stock_data_func):
                             st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
                             
                     except requests.exceptions.Timeout:
-                        st.warning("🦤 TELEMETRY DELAY: Matrix generation took longer than 45 seconds. Please click again to retry.")
+                        st.warning("TELEMETRY DELAY: Matrix generation took longer than 45 seconds. Please click again to retry.")
                     except requests.exceptions.RequestException as e:
                         st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
                     
