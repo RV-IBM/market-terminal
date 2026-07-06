@@ -53,10 +53,10 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     filtered_hist = full_hist.copy()
 
                 # Render Charts
-                st.subheader(f"📊 {pro_ticker.upper()} DETAILED ALGORITHMIC PROFILE")
+                st.subheader(f"{pro_ticker.upper()} DETAILED ALGORITHMIC PROFILE")
                 st.line_chart(filtered_hist['Close'])
 
-                st.subheader("📄 DETAILED LIVE MICROSTRUCTURE DATA")
+                st.subheader("DETAILED LIVE MICROSTRUCTURE DATA")
                 m1, m2, m3, m4 = st.columns(4)
                 
                 curr_price = filtered_hist['Close'].iloc[-1]
@@ -102,7 +102,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         st.divider()
 
         if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-            with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
+            with st.spinner("Decoding Advanced Quant Telemetry..."):
                 try:
                     url = st.secrets.get("PIPEDREAM_URL", "")
                     if url:
