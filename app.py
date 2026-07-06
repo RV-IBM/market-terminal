@@ -88,7 +88,7 @@ with st.sidebar:
     st.markdown("### **LEVEL 2 CLEARANCE**\n* Unlimited Neural Dives\n* Institutional SMAs\n* Risk Matrices")
     st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
     st.divider()
-    is_premium = st.checkbox("🔓 Simulate Pro Access (Dev Mode)", value=False)
+    is_premium = st.checkbox("🔓 Simulate Pro Access", value=False)
 
 # 4. TABS & CONTENT
 tab1, tab2, tab3 = st.tabs(["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"])
