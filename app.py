@@ -4,7 +4,7 @@ import requests
 import datetime
 from free_terminal import render_free_terminal
 from pro_terminal import render_pro_terminal
-
+from charting_engine import render_charting_engine
 # 1. PAGE CONFIG & GLOBAL HEX STYLING
 # Preserving your complete aesthetic, including the neon grid SVG and glowing effects.
 st.set_page_config(page_title="SOAR Markets", layout="wide")
@@ -91,7 +91,7 @@ with st.sidebar:
     is_premium = st.checkbox("🔓 Simulate Pro Access", value=False)
 
 # 4. TABS & CONTENT
-tab1, tab2, tab3 = st.tabs(["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK"])
+tab1, tab2, tab3, tab4 = st.tabs(["HOME ENGINE", "FREE TERMINAL", "PRO QUANT DESK", "CANDLESTICK ENGINE"])
 
 with tab1:
     st.title("SOAR MARKETS PLATFORM")
@@ -144,3 +144,5 @@ with tab2:
 
 with tab3:
     render_pro_terminal(is_premium, get_stock_data_func)
+with tab4:
+    render_charting_engine(is_premium, get_stock_data_func)
