@@ -177,7 +177,7 @@ def render_free_terminal(get_stock_data_func):
         """, unsafe_allow_html=True)
 
         # Basic historical line chart (shows up automatically without needing button click)
-        st.subheader(f"📈 {ticker} 30-DAY PRICE PATH")
+        st.subheader(f"{ticker} 30-DAY PRICE PATH")
         st.line_chart(hist['Close'])
 
         st.divider()
@@ -200,7 +200,7 @@ def render_free_terminal(get_stock_data_func):
                         st.error("CONFIGURATION REQUIRED: PIPEDREAM_URL key is missing from secrets.")
                         return
                         
-                    res = requests.post(url, json=payload, timeout=20)
+                    res = requests.post(url, json=payload, timeout=60)
                     
                     if res.status_code == 200:
                         st.success("NEURAL LINK ESTABLISHED")
@@ -243,33 +243,30 @@ def render_free_terminal(get_stock_data_func):
                         # Apply keyword highlights to the summary narrative
                         highlighted_summary = cyber_highlight(summary) if summary else f"Asset price is hovering in its short-term trading bounds. Active levels suggest consolidation around its 52-week trajectory midpoint."
 
-                        st.markdown(f"""
-                        <div style="background-color:#08101e; border: 1px solid #00e5ff; border-radius:10px; padding:25px; box-shadow:0 0 15px rgba(0,229,255,0.15); margin-top:15px;">
-                            <h3 style="color:#00e5ff; margin-top:0; font-family:'Courier New', monospace; letter-spacing:0.1em; text-shadow:0 0 10px rgba(0,229,255,0.5);">NEURAL INTEGRATION PROTOCOL</h3>
-                            
-                            <div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">
-                                <div style="border-left: 3px solid {outlook_color}; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">
-                                    <div class="metric-label" style="font-size:0.7rem;">Forecast Outlook</div>
-                                    <div style="font-size:1.1rem; font-weight:bold; color:{outlook_color};">{outlook}</div>
-                                </div>
-                                <div style="border-left: 3px solid #00ff88; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">
-                                    <div class="metric-label" style="font-size:0.7rem;">Expected Support</div>
-                                    <div style="font-size:1.1rem; font-weight:bold; color:#00ff88; font-family: monospace;">{support}</div>
-                                </div>
-                                <div style="border-left: 3px solid #ff3333; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">
-                                    <div class="metric-label" style="font-size:0.7rem;">Target Resistance</div>
-                                    <div style="font-size:1.1rem; font-weight:bold; color:#ff3333; font-family: monospace;">{resistance}</div>
-                                </div>
-                            </div>
-                            
-                            <div style="border-top:1px solid #1e293b; padding-top:15px;">
-                                <h4 style="color:#ccd6f6; margin-top:0; font-size:0.95rem;">PERFORMANCE & MOMENTUM SUMMARY</h4>
-                                <p style="color:#8892b0; font-size:0.9rem; line-height:1.6; margin-bottom:0;">
-                                    {highlighted_summary}
-                                </p>
-                            </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                        html_code = (
+                            f'<div style="background-color:#08101e; border: 1px solid #00e5ff; border-radius:10px; padding:25px; box-shadow:0 0 15px rgba(0,229,255,0.15); margin-top:15px;">'
+                            f'<h3 style="color:#00e5ff; margin-top:0; font-family:\'Courier New\', monospace; letter-spacing:0.1em; text-shadow:0 0 10px rgba(0,229,255,0.5);">NEURAL INTEGRATION PROTOCOL</h3>'
+                            f'<div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">'
+                            f'<div style="border-left: 3px solid {outlook_color}; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
+                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Forecast Outlook</div>'
+                            f'<div style="font-size:1.1rem; font-weight:bold; color:{outlook_color};">{outlook}</div>'
+                            f'</div>'
+                            f'<div style="border-left: 3px solid #00ff88; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
+                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Expected Support</div>'
+                            f'<div style="font-size:1.1rem; font-weight:bold; color:#00ff88; font-family: monospace;">{support}</div>'
+                            f'</div>'
+                            f'<div style="border-left: 3px solid #ff3333; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
+                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Target Resistance</div>'
+                            f'<div style="font-size:1.1rem; font-weight:bold; color:#ff3333; font-family: monospace;">{resistance}</div>'
+                            f'</div>'
+                            f'</div>'
+                            f'<div style="border-top:1px solid #1e293b; padding-top:15px;">'
+                            f'<h4 style="color:#ccd6f6; margin-top:0; font-size:0.95rem;">PERFORMANCE & MOMENTUM SUMMARY</h4>'
+                            f'<p style="color:#8892b0; font-size:0.9rem; line-height:1.6; margin-bottom:0;">{highlighted_summary}</p>'
+                            f'</div>'
+                            f'</div>'
+                        )
+                        st.markdown(html_code, unsafe_allow_html=True)
                         
                     else:
                         st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
