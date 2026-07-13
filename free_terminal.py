@@ -118,7 +118,7 @@ def render_free_terminal(get_stock_data_func):
         </style>
         """, unsafe_allow_html=True)
 
-        st.subheader("STANDARD TELEMETRY STREAM")
+        st.subheader(" STANDARD TELEMETRY STREAM")
         
         col_m1, col_m2, col_m3, col_m4 = st.columns(4)
         with col_m1:
@@ -206,20 +206,37 @@ def render_free_terminal(get_stock_data_func):
                         st.success("NEURAL LINK ESTABLISHED")
                         raw_prediction = res.json().get("prediction", "No telemetry data.")
                         
-                        # Strip thinking tags if models outputs them
+                        # FIX 1: Safely remove <think> tags using string slicing instead of C-regex
+                        # (Prevents Regex C-engine stack overflow segfaults)
                         clean_output = str(raw_prediction)
-                        clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+                        if "<think>" in clean_output and "</think>" in clean_output:
+                            start = clean_output.find("<think>")
+                            end = clean_output.rfind("</think>") + len("</think>")
+                            clean_output = clean_output[:start] + clean_output[end:]
+                        clean_output = clean_output.strip()
                         
-                        # Handle serialization formatting issues
-                        if clean_output.startswith("```json"):
-                            clean_output = clean_output.replace("```json", "").replace("```", "").strip()
+                        # Handle serialization formatting issues safely
+                        if "```json" in clean_output.lower():
+                            try:
+                                clean_output = clean_output.split("```json")[1].split("```")[0].strip()
+                            except:
+                                pass
+                        elif "```" in clean_output:
+                            try:
+                                clean_output = clean_output.split("```")[1].split("```")[0].strip()
+                            except:
+                                pass
                             
                         parsed_dict = None
                         try:
                             parsed_dict = json.loads(clean_output)
                         except:
+                            # FIX 2: Removed ast.literal_eval completely. 
+                            # (Prevents CPython AST Segfaults on malformed AI strings)
                             try:
-                                parsed_dict = ast.literal_eval(clean_output)
+                                safe_json = clean_output.replace("'", '"')
+                                safe_json = safe_json.replace("True", "true").replace("False", "false")
+                                parsed_dict = json.loads(safe_json)
                             except:
                                 parsed_dict = None
 
@@ -229,13 +246,17 @@ def render_free_terminal(get_stock_data_func):
                             outlook = parsed_dict.get("Outlook", parsed_dict.get("30-Day Outlook", parsed_dict.get("outlook", "Neutral")))
                             support = parsed_dict.get("Support", parsed_dict.get("support_levels", parsed_dict.get("support", "N/A")))
                             resistance = parsed_dict.get("Resistance", parsed_dict.get("resistance", "N/A"))
-                            summary = parsed_dict.get("Contextual Intelligence", parsed_dict.get("analysis", parsed_dict.get("summary", "")))
+                            summary = str(parsed_dict.get("Contextual Intelligence", parsed_dict.get("analysis", parsed_dict.get("summary", ""))))
                         else:
                             # Failsafe Fallback if AI printed non-JSON markdown paragraphs
                             outlook = "Active" if pct_change > 0 else "Consolidating"
                             support = f"${day_low:.2f}"
                             resistance = f"${day_high:.2f}"
-                            summary = clean_output
+                            summary = str(clean_output)
+
+                        # FIX 3: Strip newlines/tabs from summary! 
+                        # If we inject raw newlines into the f-string, Streamlit interprets the HTML as an indented markdown code block.
+                        summary = summary.replace("\n", " ").replace("\r", " ").replace("  ", " ")
 
                         # Render Cyberized Intelligence Box
                         outlook_color = "#00ff88" if "bull" in outlook.lower() or "up" in outlook.lower() else "#ff3333" if "bear" in outlook.lower() or "down" in outlook.lower() else "#00e5ff"
