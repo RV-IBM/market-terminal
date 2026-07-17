@@ -15,7 +15,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
     
     # If Plotly is missing, show a helpful installation guide instead of crashing
     if not PLOTLY_AVAILABLE:
-        st.error("🔌 MISSING DEPENDENCY: Plotly is not installed in this environment.")
+        st.error("MISSING DEPENDENCY: Plotly is not installed in this environment.")
         st.markdown("""
         <div style="border: 1px solid #ff3333; padding: 20px; border-radius: 10px; background: rgba(255, 51, 51, 0.05); margin-bottom: 20px;">
             <h3 style="color: #ff3333; margin-top: 0;">How to Resolve This Instantly:</h3>
@@ -32,7 +32,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
         """, unsafe_allow_html=True)
         
         # Render a basic line chart fallback so they still get value in the meantime
-        st.subheader("📉 Standard Fallback View (Close Price Trend)")
+        st.subheader("Standard Fallback View (Close Price Trend)")
         ticker_fallback = st.text_input("INPUT TICKER FOR BASIC CHART:", placeholder="e.g., SPY").upper()
         if ticker_fallback:
             try:
@@ -45,7 +45,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     if hist is not None and not hist.empty:
                         st.line_chart(hist['Close'])
                     else:
-                        st.warning("⚠️ No data available.")
+                        st.warning("No data available.")
             except Exception as e:
                 st.error(f"Fallback Error: {e}")
         return
@@ -118,7 +118,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     st.divider()
                     
                     # PRO: AI Pattern Analysis 
-                    st.subheader("🧠 LIVE AI PATTERN RECOGNITION")
+                    st.subheader("LIVE AI PATTERN RECOGNITION")
                     if st.button("RUN TECHNICAL AI ANALYSIS"):
                         with st.spinner("Scanning for technical breakouts and chart patterns..."):
                             try:
@@ -155,6 +155,6 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
 
             else:
-                st.warning("⚠️ Market data unavailable for charting.")
+                st.warning("Market data unavailable for charting.")
         except Exception as e:
-            st.error(f"⚠️ CHARTING ERROR: {str(e)}")
+            st.error(f"CHARTING ERROR: {str(e)}")
