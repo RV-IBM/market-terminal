@@ -33,21 +33,24 @@ def render_pro_terminal(is_premium, get_stock_data_func):
 
     if pro_ticker:
         try:
-            # FIX: Fetch 1y directly from yfinance FIRST so we have enough data for 90/180/YTD slices
+            # 1. FORCE 1-YEAR HISTORY FETCH DIRECTLY FIRST
+            import yfinance as yf
             t = yf.Ticker(pro_ticker)
             full_hist = t.history(period="1y")
             
-            # Use helper function just to grab the info/metadata quickly
+            # 2. GRAB METADATA FROM HELPER
             try:
-                info, _ = get_stock_data_func(pro_ticker, range_type="pro")
-            except:
+                info, fallback_hist = get_stock_data_func(pro_ticker, range_type="pro")
+            except Exception:
                 info = t.info if hasattr(t, 'info') else {}
+                fallback_hist = None
             
-            # Robust fallback for ticker data if yfinance directly fails
+            # 3. ONLY USE HELPER HISTORY IF YFINANCE FAILS
             if full_hist is None or full_hist.empty:
-                info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
+                full_hist = fallback_hist
 
             if full_hist is not None and not full_hist.empty:
+                from datetime import datetime, timedelta
                 last_date = full_hist.index.max()
                 if window_selection == "90 Days":
                     filtered_hist = full_hist[full_hist.index >= (last_date - timedelta(days=90))]
