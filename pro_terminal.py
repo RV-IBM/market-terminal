@@ -33,13 +33,19 @@ def render_pro_terminal(is_premium, get_stock_data_func):
 
     if pro_ticker:
         try:
-            info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
+            # FIX: Fetch 1y directly from yfinance FIRST so we have enough data for 90/180/YTD slices
+            t = yf.Ticker(pro_ticker)
+            full_hist = t.history(period="1y")
             
-            # Robust fallback for ticker data
+            # Use helper function just to grab the info/metadata quickly
+            try:
+                info, _ = get_stock_data_func(pro_ticker, range_type="pro")
+            except:
+                info = t.info if hasattr(t, 'info') else {}
+            
+            # Robust fallback for ticker data if yfinance directly fails
             if full_hist is None or full_hist.empty:
-                t = yf.Ticker(pro_ticker)
-                full_hist = t.history(period="1y")
-                info = t.info if t.info else {}
+                info, full_hist = get_stock_data_func(pro_ticker, range_type="pro")
 
             if full_hist is not None and not full_hist.empty:
                 last_date = full_hist.index.max()
@@ -94,10 +100,10 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     st.write(f"**Continuation Trigger:** `${(resistance * 1.01):,.2f}`")
 
             else:
-                st.warning(f"⚠️ Live telemetry for {pro_ticker} unavailable.")
+                st.warning(f"Live telemetry for {pro_ticker} unavailable.")
         
         except Exception as e:
-            st.error(f"⚠️ INTERFACE ERROR: {str(e)}")
+            st.error(f"INTERFACE ERROR: {str(e)}")
 
         st.divider()
 
