@@ -15,7 +15,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
     
     # If Plotly is missing, show a helpful installation guide instead of crashing
     if not PLOTLY_AVAILABLE:
-        st.error("🔌 MISSING DEPENDENCY: Plotly is not installed in this environment.")
+        st.error("MISSING DEPENDENCY: Plotly is not installed in this environment.")
         st.markdown("""
         <div style="border: 1px solid #ff3333; padding: 20px; border-radius: 10px; background: rgba(255, 51, 51, 0.05); margin-bottom: 20px;">
             <h3 style="color: #ff3333; margin-top: 0;">How to Resolve This Instantly:</h3>
@@ -100,7 +100,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
 
                 # 3. Handle Free vs Pro Capabilities
                 if is_premium:
-                    st.markdown("<h4 style='color:#00ff88;'>🔓 PRO TIER: Annotation Tools Active</h4>", unsafe_allow_html=True)
+                    st.markdown("<h4 style='color:#00ff88;'>PRO TIER: Annotation Tools Active</h4>", unsafe_allow_html=True)
                     st.caption("Use the toolbar in the top right of the chart to draw trendlines and support zones.")
                     
                     # PRO: Unlock Plotly's native drawing tools for annotations
