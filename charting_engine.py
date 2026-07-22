@@ -15,7 +15,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
     
     # If Plotly is missing, show a helpful installation guide instead of crashing
     if not PLOTLY_AVAILABLE:
-        st.error("MISSING DEPENDENCY: Plotly is not installed in this environment.")
+        st.error("🔌 MISSING DEPENDENCY: Plotly is not installed in this environment.")
         st.markdown("""
         <div style="border: 1px solid #ff3333; padding: 20px; border-radius: 10px; background: rgba(255, 51, 51, 0.05); margin-bottom: 20px;">
             <h3 style="color: #ff3333; margin-top: 0;">How to Resolve This Instantly:</h3>
@@ -120,74 +120,105 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     # PRO: AI Pattern Analysis 
                     st.subheader("LIVE AI PATTERN RECOGNITION")
                     if st.button("RUN TECHNICAL AI ANALYSIS"):
-                        with st.spinner("Scanning for technical breakouts and chart patterns..."):
+                        with st.spinner(f"Scanning {period} candlestick formations for predictive patterns..."):
                             try:
                                 url = st.secrets.get("PIPEDREAM_URL", "")
                                 if url:
-                                    res = requests.post(url, json={"ticker": ticker, "tier": "chart_pro"}, timeout=45)
+                                    # 1. NEW PAYLOAD: Pass the specific timeframe and prompt it to predict the future!
+                                    payload = {
+                                        "ticker": ticker, 
+                                        "tier": "chart_pro",
+                                        "timeframe": period,
+                                        "analysis_type": "candlestick_prediction",
+                                        "instructions": f"Analyze the candlestick patterns over the {period} timeframe. Provide a future price prediction, momentum outlook, and key support/resistance zones."
+                                    }
+                                    res = requests.post(url, json=payload, timeout=45)
+                                    
                                     if res.status_code == 200:
                                         raw_prediction = res.json().get("prediction", "No data.")
                                         
-                                        # --- NEW ADVANCED UI RENDERER FOR CHARTING ---
+                                        # 2. BULLETPROOF PARSER: Clean rogue prefixes like "AI VERDICT: "
                                         clean_output = str(raw_prediction).replace("\\n", "\n").replace("\\\"", "\"")
                                         import re, ast, json
-                                        # Scrub <think> tags if reasoning models are used
                                         clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+                                        
+                                        # Strip everything before the first '{' and after the last '}'
+                                        if "{" in clean_output and "}" in clean_output:
+                                            clean_output = clean_output[clean_output.find("{") : clean_output.rfind("}") + 1]
                                         
                                         def cyber_highlight(text):
                                             if not isinstance(text, str): return str(text)
-                                            text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum|resilience|recovery|positive|breakout)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
-                                            text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown|drawdown|distribution)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
+                                            text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum|resilience|recovery|positive|breakout|rally)', r'<span style="color: #00ff88; font-weight:bold;">\1</span>', text)
+                                            text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown|drawdown|distribution|drop)', r'<span style="color: #ff3333; font-weight:bold;">\1</span>', text)
                                             return text
                                             
                                         json_obj = None
-                                        if "{" in clean_output:
+                                        try:
+                                            json_obj = json.loads(clean_output)
+                                        except:
                                             try:
-                                                start = clean_output.find("{")
-                                                end = clean_output.rfind("}") + 1
-                                                bracketed_text = clean_output[start:end]
-                                                try:
-                                                    json_obj = json.loads(bracketed_text)
-                                                except:
-                                                    json_obj = ast.literal_eval(bracketed_text)
+                                                # Fallback if AI uses single quotes
+                                                json_obj = ast.literal_eval(clean_output)
                                             except:
                                                 json_obj = None
                                                 
-                                        # Render the nested Cyber Cards
+                                        # 3. STRUCTURED CANDLESTICK UI
                                         if json_obj and isinstance(json_obj, dict):
-                                            dashboard_html = """
-                                            <style>
-                                                .cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', Courier, monospace;}
-                                                .cyber-title { color: #00e5ff; font-size: 1.1em; font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; text-transform: uppercase;}
-                                                .cyber-key { color: #8892b0; font-weight: bold; font-size: 0.9em; text-transform: capitalize;}
-                                                .cyber-value { color: #e2e8f0; font-size: 0.95em; margin-bottom: 10px; display: block; line-height: 1.6;}
-                                            </style>
-                                            <div style="padding: 10px 0;">
-                                            """
-                                            def build_html(obj):
-                                                html = ""
-                                                if isinstance(obj, dict):
-                                                    for k, v in obj.items():
-                                                        clean_k = str(k).replace("_", " ")
-                                                        if isinstance(v, (dict, list)):
-                                                            html += f"<div class='cyber-card'><div class='cyber-title'>{clean_k}</div>{build_html(v)}</div>"
-                                                        else:
-                                                            html += f"<div><span class='cyber-key'>{clean_k}: </span><span class='cyber-value'>{cyber_highlight(str(v))}</span></div>"
-                                                elif isinstance(obj, list):
-                                                    for item in obj:
-                                                        html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
-                                                else:
-                                                    html += f"<span class='cyber-value'>{cyber_highlight(str(obj))}</span>"
-                                                return html
+                                            # Find the core data (handles nested 'alpha_gen_intelligence' or direct keys)
+                                            data = json_obj.get("alpha_gen_intelligence", json_obj)
+                                            
+                                            st.markdown(f"""
+                                            <div style="background: linear-gradient(180deg, #0a0e17 0%, #05070a 100%); border: 1px solid #00e5ff; border-radius: 8px; padding: 20px; box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);">
+                                                <h3 style="color: #00e5ff; font-family: monospace; margin-top: 0; text-transform: uppercase;">{period} Predictive Model</h3>
+                                            </div>
+                                            """, unsafe_allow_html=True)
+                                            
+                                            # Key Metrics Columns
+                                            col1, col2, col3 = st.columns(3)
+                                            
+                                            outlook = data.get("outlook", data.get("outlook_30d", "Analyzing..."))
+                                            if "Bull" in str(outlook) or "up" in str(outlook).lower():
+                                                col1.metric("Future Trajectory", f"{outlook}")
+                                            elif "Bear" in str(outlook) or "down" in str(outlook).lower():
+                                                col1.metric("Future Trajectory", f"{outlook}")
+                                            else:
+                                                col1.metric("Future Trajectory", f"{outlook} ⚖️")
                                                 
-                                            dashboard_html += build_html(json_obj) + "</div>"
-                                            st.markdown(dashboard_html, unsafe_allow_html=True)
+                                            # Extract nested quant data if it exists
+                                            quant = data.get("quantitative_trend_telemetry", {})
+                                            if not quant and "support_levels" in data:
+                                                quant = data # Flattened fallback
+                                                
+                                            sr = quant.get("support_resistance", {})
+                                            
+                                            # Extract support/resistance safely (handles lists or dicts)
+                                            sup = sr.get("primary_support") or data.get("support_levels", ["N/A"])
+                                            res_lvl = sr.get("primary_resistance") or data.get("resistance_levels", ["N/A"])
+                                            
+                                            if isinstance(sup, list) and len(sup) > 0: sup = sup[0]
+                                            if isinstance(res_lvl, list) and len(res_lvl) > 0: res_lvl = res_lvl[0]
+                                            
+                                            col2.metric("Key Support Floor", f"${sup}")
+                                            col3.metric("Breakout Resistance", f"${res_lvl}")
+                                            
+                                            # Detailed Analysis Expanders
+                                            with st.expander(f"{period} Candlestick Analysis & Future Forecast", expanded=True):
+                                                summary_text = data.get("summary", data.get("contextual_intelligence", "No trajectory summary provided."))
+                                                st.markdown(f"<div style='font-size: 1.05em; line-height: 1.6; color: #e2e8f0;'>{cyber_highlight(str(summary_text))}</div>", unsafe_allow_html=True)
+                                                
+                                            if "delta_summary" in quant or "volatility_profile" in quant:
+                                                with st.expander("🔬 Quantitative Telemetry", expanded=False):
+                                                    st.write("**Price Delta:**")
+                                                    st.info(quant.get("delta_summary", "N/A"))
+                                                    st.write("**Volatility Profile:**")
+                                                    st.warning(quant.get("volatility_profile", "N/A"))
+
                                         else:
-                                            # Formatted fallback for pure text
+                                            # Fallback if the JSON structure is completely unrecognizable
                                             fallback_html = f"<div style='background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 20px; font-family: \"Courier New\", Courier, monospace; color: #e2e8f0; line-height: 1.7; font-size: 1.05em;'>{cyber_highlight(clean_output)}</div>"
                                             st.markdown(fallback_html, unsafe_allow_html=True)
                                     else:
-                                        st.error("Server error.")
+                                        st.error(f"Server error: {res.status_code}")
                                 else:
                                     st.error("Missing API Key.")
                             except Exception as e:
