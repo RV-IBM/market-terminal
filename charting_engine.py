@@ -182,7 +182,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                                             elif "Bear" in str(outlook) or "down" in str(outlook).lower():
                                                 col1.metric("Future Trajectory", f"{outlook}")
                                             else:
-                                                col1.metric("Future Trajectory", f"{outlook} ⚖️")
+                                                col1.metric("Future Trajectory", f"{outlook}")
                                                 
                                             # Extract nested quant data if it exists
                                             quant = data.get("quantitative_trend_telemetry", {})
@@ -207,7 +207,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                                                 st.markdown(f"<div style='font-size: 1.05em; line-height: 1.6; color: #e2e8f0;'>{cyber_highlight(str(summary_text))}</div>", unsafe_allow_html=True)
                                                 
                                             if "delta_summary" in quant or "volatility_profile" in quant:
-                                                with st.expander("🔬 Quantitative Telemetry", expanded=False):
+                                                with st.expander("Quantitative Telemetry", expanded=False):
                                                     st.write("**Price Delta:**")
                                                     st.info(quant.get("delta_summary", "N/A"))
                                                     st.write("**Volatility Profile:**")
