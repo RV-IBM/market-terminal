@@ -8,6 +8,7 @@ import ast
 from datetime import datetime, timedelta
 
 def render_pro_terminal(is_premium, get_stock_data_func):
+    stripe_link = st.secrets.get("STRIPE_CHECKOUT_URL", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
     # ==========================================
     # ACCESS CONTROL (UI CONSISTENCY)
     # ==========================================
@@ -18,8 +19,11 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             <h1 style='color: #00e5ff; font-family: monospace;'>🔒 ACCESS DENIED: LEVEL 2 CLEARANCE REQUIRED</h1>
         </div>
         """, unsafe_allow_html=True)
-        st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
+        st.link_button("UPGRADE TERMINAL ACCESS", stripe_link)
+        
+        st.caption("*If clicking the button above doesn't open Stripe, copy and paste your link into your `.streamlit/secrets.toml` as `STRIPE_CHECKOUT_URL`.*")
         return
+        
 
     # ==========================================
     # INSTITUTIONAL QUANT DESK UI
