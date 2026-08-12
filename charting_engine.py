@@ -15,7 +15,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
     
     # If Plotly is missing, show a helpful installation guide instead of crashing
     if not PLOTLY_AVAILABLE:
-        st.error("🔌 MISSING DEPENDENCY: Plotly is not installed in this environment.")
+        st.error("MISSING DEPENDENCY: Plotly is not installed in this environment.")
         st.markdown("""
         <div style="border: 1px solid #ff3333; padding: 20px; border-radius: 10px; background: rgba(255, 51, 51, 0.05); margin-bottom: 20px;">
             <h3 style="color: #ff3333; margin-top: 0;">How to Resolve This Instantly:</h3>
@@ -45,7 +45,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     if hist is not None and not hist.empty:
                         st.line_chart(hist['Close'])
                     else:
-                        st.warning("⚠️ No data available.")
+                        st.warning("No data available.")
             except Exception as e:
                 st.error(f"Fallback Error: {e}")
         return
@@ -118,7 +118,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                     st.divider()
                     
                     # PRO: AI Pattern Analysis 
-                    st.subheader("🧠 LIVE AI PATTERN RECOGNITION")
+                    st.subheader("LIVE AI PATTERN RECOGNITION")
                     if st.button("RUN TECHNICAL AI ANALYSIS"):
                         with st.spinner(f"Scanning {period} candlestick formations for predictive patterns..."):
                             try:
@@ -189,11 +189,11 @@ def render_charting_engine(is_premium, get_stock_data_func):
                                             # Trajectory Analysis
                                             outlook = data.get("outlook_30d", data.get("outlook", "Analyzing..."))
                                             if "Bull" in str(outlook) or "up" in str(outlook).lower() or "positive" in str(outlook).lower():
-                                                col1.metric("Future Trajectory", f"{outlook} 🚀")
+                                                col1.metric("Future Trajectory", f"{outlook}")
                                             elif "Bear" in str(outlook) or "down" in str(outlook).lower() or "negative" in str(outlook).lower():
-                                                col1.metric("Future Trajectory", f"{outlook} 🔻")
+                                                col1.metric("Future Trajectory", f"{outlook}")
                                             else:
-                                                col1.metric("Future Trajectory", f"{outlook} ⚖️")
+                                                col1.metric("Future Trajectory", f"{outlook}")
                                                 
                                             # Extract nested quant data matching your specific Pipedream payload
                                             quant = data.get("quantitative_trend_telemetry", {})
@@ -216,13 +216,13 @@ def render_charting_engine(is_premium, get_stock_data_func):
                                             col3.metric("Breakout Resistance", f"{res_lvl}")
                                             
                                             # Detailed Analysis Expanders
-                                            with st.expander(f"📊 {period} Candlestick Analysis & Future Forecast", expanded=True):
+                                            with st.expander(f"{period} Candlestick Analysis & Future Forecast", expanded=True):
                                                 # Look for 'institutional_alignment' based on your screenshot!
                                                 summary_text = quant.get("institutional_alignment", data.get("summary", data.get("contextual_intelligence", "Trajectory analysis complete.")))
                                                 st.markdown(f"<div style='font-size: 1.05em; line-height: 1.6; color: #e2e8f0;'>{cyber_highlight(str(summary_text))}</div>", unsafe_allow_html=True)
                                                 
                                             if "delta_summary" in quant or "volatility_profile" in quant:
-                                                with st.expander("🔬 Quantitative Telemetry", expanded=False):
+                                                with st.expander("Quantitative Telemetry", expanded=False):
                                                     st.write("**Price Action & Delta:**")
                                                     st.info(cyber_highlight(str(quant.get("delta_summary", "N/A"))))
                                                     st.write("**Volatility Profile:**")
