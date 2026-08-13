@@ -8,7 +8,7 @@ import ast
 from datetime import datetime, timedelta
 
 def render_pro_terminal(is_premium, get_stock_data_func):
-    stripe_link = st.secrets.get("STRIPE_CHECKOUT_URL", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
+    stripe_link = st.secrets.get("STRIPE_CHECKOUT_URL", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00")
     # ==========================================
     # ACCESS CONTROL (UI CONSISTENCY)
     # ==========================================
