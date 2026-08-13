@@ -32,7 +32,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
         """, unsafe_allow_html=True)
         
         # Render a basic line chart fallback so they still get value in the meantime
-        st.subheader("📉 Standard Fallback View (Close Price Trend)")
+        st.subheader("Standard Fallback View (Close Price Trend)")
         ticker_fallback = st.text_input("INPUT TICKER FOR BASIC CHART:", placeholder="e.g., SPY").upper()
         if ticker_fallback:
             try:
@@ -256,7 +256,7 @@ def render_charting_engine(is_premium, get_stock_data_func):
                         <p style='color: #8892b0;'>Pro users can draw custom trendlines directly on the chart and trigger our Neural Link to analyze complex candlestick formations in real-time.</p>
                     </div>
                     """, unsafe_allow_html=True)
-                    st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHedq3J8aSDe3e00")
+                    st.link_button("UPGRADE TERMINAL ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00")
 
             else:
                 st.warning("⚠️ Market data unavailable for charting.")
