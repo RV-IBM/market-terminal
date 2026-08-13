@@ -37,6 +37,20 @@ def cyber_highlight(text):
     text = re.sub(negatives, r"<span style='color:#ff3333; font-weight:bold;'>\1</span>", text, flags=re.IGNORECASE)
     return text
 
+def safe_extract(data_obj, possible_keys, default="N/A"):
+    """Recursively searches a dictionary for the first matching key to prevent N/A errors."""
+    if not isinstance(data_obj, dict):
+        return default
+    for k in possible_keys:
+        if k in data_obj and data_obj[k] not in [None, "", "N/A", "null"]:
+            return data_obj[k]
+    for v in data_obj.values():
+        if isinstance(v, dict):
+            result = safe_extract(v, possible_keys, None)
+            if result is not None:
+                return result
+    return default
+
 def render_free_terminal(get_stock_data_func):
     st.title("STANDARD INTELLIGENCE STREAM")
     
@@ -62,7 +76,7 @@ def render_free_terminal(get_stock_data_func):
         price_change = current_price - prev_close
         pct_change = (price_change / prev_close) * 100 if prev_close else 0.0
         
-        market_cap = info.get("marketCap", "N/A")
+        market_cap = info.get("marketCap") or info.get("totalAssets", "N/A")
         if isinstance(market_cap, (int, float)):
             if market_cap >= 1e12:
                 market_cap_str = f"${market_cap/1e12:.2f}T"
@@ -76,13 +90,13 @@ def render_free_terminal(get_stock_data_func):
         pe_ratio = info.get("trailingPE") or info.get("forwardPE") or "N/A"
         pe_ratio_str = f"{pe_ratio:.2f}" if isinstance(pe_ratio, (int, float)) else "N/A"
         
-        day_high = info.get("dayHigh", current_price)
-        day_low = info.get("dayLow", current_price)
-        volume = info.get("volume", 0)
+        day_high = info.get("dayHigh") or hist['High'].iloc[-1]
+        day_low = info.get("dayLow") or hist['Low'].iloc[-1]
+        volume = info.get("volume") or hist['Volume'].iloc[-1]
         
         # 52-week trajectory calculation
-        low_52w = info.get("fiftyTwoWeekLow", current_price)
-        high_52w = info.get("fiftyTwoWeekHigh", current_price)
+        low_52w = info.get("fiftyTwoWeekLow") or hist['Low'].min()
+        high_52w = info.get("fiftyTwoWeekHigh") or hist['High'].max()
         range_52w = high_52w - low_52w
         position_52w = ((current_price - low_52w) / range_52w * 100) if range_52w else 50.0
 
@@ -243,10 +257,8 @@ def render_free_terminal(get_stock_data_func):
                                     import json
                                     json_obj = json.loads(clean_output)
                                     
-                                    # If Pipedream returned our structured intelligence payload
-                                    if "alpha_gen_intelligence" in json_obj:
-                                        data = json_obj["alpha_gen_intelligence"]
-                                        
+                                    # If Pipedream returned JSON, try to extract rich data safely
+                                    if isinstance(json_obj, dict):
                                         # Extract the final verdict
                                         verdict, v_color = get_final_verdict(json_obj, clean_output)
                                         
@@ -259,39 +271,47 @@ def render_free_terminal(get_stock_data_func):
                                         </div>
                                         """, unsafe_allow_html=True)
                                         
-                                        # Dynamic Outlook Badge
-                                        outlook = data.get('outlook_30d', 'Neutral')
-                                        if "Bullish" in outlook:
+                                        # Dynamic Robust Extractors
+                                        outlook = safe_extract(json_obj, ["outlook_30d", "outlook", "trajectory", "forecast"], "Neutral")
+                                        if "Bullish" in str(outlook) or "up" in str(outlook).lower():
                                             st.success(f"**30-Day Outlook:** {outlook} 🚀")
-                                        elif "Bearish" in outlook:
+                                        elif "Bearish" in str(outlook) or "down" in str(outlook).lower():
                                             st.error(f"**30-Day Outlook:** {outlook} 🔻")
                                         else:
                                             st.warning(f"**30-Day Outlook:** {outlook} ⚖️")
                                         
-                                        # Support, Resistance, and Confidence Metrics
-                                        quant = data.get("quantitative_trend_telemetry", {})
-                                        sr = quant.get("support_resistance", {})
-                                        exec_data = data.get("strategic_execution", {})
+                                        support_val = safe_extract(json_obj, ["primary_support", "support_level", "support", "support_1"], "N/A")
+                                        resistance_val = safe_extract(json_obj, ["primary_resistance", "resistance_level", "resistance", "resistance_1"], "N/A")
+                                        confidence_val = safe_extract(json_obj, ["confidence_score", "confidence", "ai_confidence", "probability"], "N/A")
                                         
                                         col1, col2, col3 = st.columns(3)
-                                        col1.metric("🛡️ Primary Support", f"${sr.get('primary_support', 'N/A')}")
-                                        col2.metric("🎯 Primary Resistance", f"${sr.get('primary_resistance', 'N/A')}")
-                                        col3.metric("🤖 AI Confidence", f"{exec_data.get('confidence_score', 'N/A')}%")
+                                        
+                                        sup_display = f"${support_val}" if str(support_val).replace('.','',1).isdigit() else str(support_val)
+                                        res_display = f"${resistance_val}" if str(resistance_val).replace('.','',1).isdigit() else str(resistance_val)
+                                        conf_display = f"{confidence_val}%" if str(confidence_val).replace('.','',1).isdigit() else str(confidence_val)
+
+                                        col1.metric("🛡️ Primary Support", sup_display)
+                                        col2.metric("🎯 Primary Resistance", res_display)
+                                        col3.metric("🤖 AI Confidence", conf_display)
                                         
                                         # Detailed Expandable Sections
+                                        delta_sum = safe_extract(json_obj, ["delta_summary", "summary", "trend_analysis", "analysis"], "Trend analysis complete.")
+                                        vol_profile = safe_extract(json_obj, ["volatility_profile", "volatility", "risk_profile", "risk"], "Standard market conditions detected.")
+                                        context = safe_extract(json_obj, ["contextual_intelligence", "context", "market_context", "reasoning"], "No additional context provided.")
+                                        signature = safe_extract(json_obj, ["neural_signature", "signature", "model_id"], "QUANT-MATRIX-v2.5")
+
                                         with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
                                             st.markdown("**Delta Summary**")
-                                            st.info(quant.get("delta_summary", "N/A"))
+                                            st.info(delta_sum)
                                             st.markdown("**Volatility Profile**")
-                                            st.warning(quant.get("volatility_profile", "N/A"))
+                                            st.warning(vol_profile)
                                             
                                         with st.expander("🌐 Contextual Intelligence", expanded=True):
-                                            st.write(data.get("contextual_intelligence", "N/A"))
+                                            st.write(context)
                                             
-                                        if "neural_signature" in exec_data:
-                                            st.caption(f"Neural Signature: `{exec_data.get('neural_signature')}`")
+                                        st.caption(f"Neural Signature: `{signature}`")
                                     else:
-                                        # Fallback to standard color-coded JSON if structure is different
+                                        # Fallback to standard color-coded JSON if it's not a dict
                                         st.json(json_obj)
                                 except Exception as e:
                                     # Markdown fallback if JSON parsing fails
