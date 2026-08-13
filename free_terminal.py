@@ -4,6 +4,26 @@ import json
 import ast
 import re
 
+def get_final_verdict(data_obj, raw_text):
+    """Analyzes AI output to determine a strict BUY, HOLD, or SELL conclusion."""
+    search_text = (str(data_obj) + " " + str(raw_text)).upper()
+    
+    # Explicit conclusion checks
+    if "CONCLUSION: BUY" in search_text or "'BUY'" in search_text or '"BUY"' in search_text or "RATING: BUY" in search_text:
+        return "BUY", "#00ff88"
+    if "CONCLUSION: SELL" in search_text or "'SELL'" in search_text or '"SELL"' in search_text or "RATING: SELL" in search_text:
+        return "SELL", "#ff3333"
+    if "CONCLUSION: HOLD" in search_text or "'HOLD'" in search_text or '"HOLD"' in search_text or "RATING: HOLD" in search_text:
+        return "HOLD", "#ffaa00"
+        
+    # Sentiment Fallback
+    bullish = sum(search_text.count(w) for w in ["BULL", "BUY", "ACCUMULATE", "OUTPERFORM", "UPWARD"])
+    bearish = sum(search_text.count(w) for w in ["BEAR", "SELL", "REDUCE", "UNDERPERFORM", "DOWNWARD"])
+    
+    if bullish > bearish * 1.5: return "BUY", "#00ff88"
+    elif bearish > bullish * 1.5: return "SELL", "#ff3333"
+    return "HOLD", "#ffaa00"
+
 # Premium cyber-themed word highlighting engine
 def cyber_highlight(text):
     if not isinstance(text, str):
@@ -12,8 +32,9 @@ def cyber_highlight(text):
     positives = r"\b(bullish|support|breakout|growth|gains|rebound|upside|accumulate|momentum|long|strength|buy)\b"
     negatives = r"\b(bearish|resistance|drawdown|drop|fall|decline|downside|sell|risk|weakness|contraction|short|losses)\b"
     
-    text = re.sub(positives, r"<span style='color:#00ff88; font-weight:bold; text-shadow:0 0 5px rgba(0,255,136,0.3);'>\1</span>", text, flags=re.IGNORECASE)
-    text = re.sub(negatives, r"<span style='color:#ff3333; font-weight:bold; text-shadow:0 0 5px rgba(255,51,51,0.3);'>\1</span>", text, flags=re.IGNORECASE)
+    # Removed text-shadow to keep the text clean and readable without the glowing effect
+    text = re.sub(positives, r"<span style='color:#00ff88; font-weight:bold;'>\1</span>", text, flags=re.IGNORECASE)
+    text = re.sub(negatives, r"<span style='color:#ff3333; font-weight:bold;'>\1</span>", text, flags=re.IGNORECASE)
     return text
 
 def render_free_terminal(get_stock_data_func):
@@ -27,11 +48,11 @@ def render_free_terminal(get_stock_data_func):
             with st.spinner("Establishing secure telemetry..."):
                 info, hist = get_stock_data_func(ticker, range_type="free")
         except Exception as e:
-            st.error(f"TELEMETRY OFFLINE: {e}")
+            st.error(f"⚠️ TELEMETRY OFFLINE: {e}")
             return
             
         if info is None or hist is None or hist.empty:
-            st.warning(f"Live telemetry for {ticker} is temporarily unavailable.")
+            st.warning(f"⚠️ Live telemetry for {ticker} is temporarily unavailable.")
             return
 
         # 1. LIVE DATA PREPARATION
@@ -118,7 +139,7 @@ def render_free_terminal(get_stock_data_func):
         </style>
         """, unsafe_allow_html=True)
 
-        st.subheader(" STANDARD TELEMETRY STREAM")
+        st.subheader("📊 STANDARD TELEMETRY STREAM")
         
         col_m1, col_m2, col_m3, col_m4 = st.columns(4)
         with col_m1:
@@ -177,121 +198,112 @@ def render_free_terminal(get_stock_data_func):
         """, unsafe_allow_html=True)
 
         # Basic historical line chart (shows up automatically without needing button click)
-        st.subheader(f"{ticker} 30-DAY PRICE PATH")
+        st.subheader(f"📈 {ticker} 30-DAY PRICE PATH")
         st.line_chart(hist['Close'])
 
         st.divider()
 
         # 3. TRIGGER NEURAL NETWORK ANALYSIS
         if st.button("RUN STANDARD NEURAL VERDICT"):
-            # Prepare fast telemetry payload
+            # Prepare fast telemetry payload with explicit rating instructions
             payload = {
                 "ticker": ticker,
                 "tier": "free",
                 "current_price": current_price,
                 "pct_change": pct_change,
-                "momentum": momentum_state
+                "momentum": momentum_state,
+                "instructions": "Conclude your analysis with a clear rating of exactly BUY, HOLD, or SELL."
             }
             
-            with st.spinner("Connecting to neural processor..."):
+            with st.spinner("⚡ Connecting to neural processor..."):
                 try:
                     url = st.secrets.get("PIPEDREAM_URL")
                     if not url:
-                        st.error("CONFIGURATION REQUIRED: PIPEDREAM_URL key is missing from secrets.")
+                        st.error("🔑 CONFIGURATION REQUIRED: PIPEDREAM_URL key is missing from secrets.")
                         return
                         
                     res = requests.post(url, json=payload, timeout=60)
                     
                     if res.status_code == 200:
-                        st.success("NEURAL LINK ESTABLISHED")
+                        st.success("⚡ NEURAL LINK ESTABLISHED")
                         raw_prediction = res.json().get("prediction", "No telemetry data.")
                         
-                        # FIX 1: Safely remove <think> tags using string slicing instead of C-regex
-                        # (Prevents Regex C-engine stack overflow segfaults)
                         clean_output = str(raw_prediction)
-                        if "<think>" in clean_output and "</think>" in clean_output:
-                            start = clean_output.find("<think>")
-                            end = clean_output.rfind("</think>") + len("</think>")
-                            clean_output = clean_output[:start] + clean_output[end:]
-                        clean_output = clean_output.strip()
                         
-                        # Handle serialization formatting issues safely
-                        if "```json" in clean_output.lower():
-                            try:
-                                clean_output = clean_output.split("```json")[1].split("```")[0].strip()
-                            except:
-                                pass
-                        elif "```" in clean_output:
-                            try:
-                                clean_output = clean_output.split("```")[1].split("```")[0].strip()
-                            except:
-                                pass
+                        if isinstance(clean_output, str):
+                            clean_output = clean_output.replace("\\n", "\n").replace("\\\"", "\"")
                             
-                        parsed_dict = None
-                        try:
-                            parsed_dict = json.loads(clean_output)
-                        except:
-                            # FIX 2: Removed ast.literal_eval completely. 
-                            # (Prevents CPython AST Segfaults on malformed AI strings)
-                            try:
-                                safe_json = clean_output.replace("'", '"')
-                                safe_json = safe_json.replace("True", "true").replace("False", "false")
-                                parsed_dict = json.loads(safe_json)
-                            except:
-                                parsed_dict = None
-
-                        # Pull out Outlook & Support safely, providing computed fallbacks
-                        if isinstance(parsed_dict, dict):
-                            # Try multiple key variants in case AI generates unique keys
-                            outlook = parsed_dict.get("Outlook", parsed_dict.get("30-Day Outlook", parsed_dict.get("outlook", "Neutral")))
-                            support = parsed_dict.get("Support", parsed_dict.get("support_levels", parsed_dict.get("support", "N/A")))
-                            resistance = parsed_dict.get("Resistance", parsed_dict.get("resistance", "N/A"))
-                            summary = str(parsed_dict.get("Contextual Intelligence", parsed_dict.get("analysis", parsed_dict.get("summary", ""))))
+                            # Scrub out <think> tags from reasoning models
+                            import re
+                            clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
+                            
+                            # --- SMART JSON DETECTOR & PREMIUM DASHBOARD ---
+                            if clean_output.startswith("{") and clean_output.endswith("}"):
+                                try:
+                                    import json
+                                    json_obj = json.loads(clean_output)
+                                    
+                                    # If Pipedream returned our structured intelligence payload
+                                    if "alpha_gen_intelligence" in json_obj:
+                                        data = json_obj["alpha_gen_intelligence"]
+                                        
+                                        # Extract the final verdict
+                                        verdict, v_color = get_final_verdict(json_obj, clean_output)
+                                        
+                                        st.markdown(f"""
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                                            <h3 style="margin: 0;">🧠 Neural Analysis: {ticker.upper()}</h3>
+                                            <div style="border: 2px solid {v_color}; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 6px; font-weight: bold; color: {v_color}; font-size: 1.2rem; letter-spacing: 0.1em; box-shadow: 0 0 12px {v_color}40;">
+                                                {verdict}
+                                            </div>
+                                        </div>
+                                        """, unsafe_allow_html=True)
+                                        
+                                        # Dynamic Outlook Badge
+                                        outlook = data.get('outlook_30d', 'Neutral')
+                                        if "Bullish" in outlook:
+                                            st.success(f"**30-Day Outlook:** {outlook} 🚀")
+                                        elif "Bearish" in outlook:
+                                            st.error(f"**30-Day Outlook:** {outlook} 🔻")
+                                        else:
+                                            st.warning(f"**30-Day Outlook:** {outlook} ⚖️")
+                                        
+                                        # Support, Resistance, and Confidence Metrics
+                                        quant = data.get("quantitative_trend_telemetry", {})
+                                        sr = quant.get("support_resistance", {})
+                                        exec_data = data.get("strategic_execution", {})
+                                        
+                                        col1, col2, col3 = st.columns(3)
+                                        col1.metric("🛡️ Primary Support", f"${sr.get('primary_support', 'N/A')}")
+                                        col2.metric("🎯 Primary Resistance", f"${sr.get('primary_resistance', 'N/A')}")
+                                        col3.metric("🤖 AI Confidence", f"{exec_data.get('confidence_score', 'N/A')}%")
+                                        
+                                        # Detailed Expandable Sections
+                                        with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
+                                            st.markdown("**Delta Summary**")
+                                            st.info(quant.get("delta_summary", "N/A"))
+                                            st.markdown("**Volatility Profile**")
+                                            st.warning(quant.get("volatility_profile", "N/A"))
+                                            
+                                        with st.expander("🌐 Contextual Intelligence", expanded=True):
+                                            st.write(data.get("contextual_intelligence", "N/A"))
+                                            
+                                        if "neural_signature" in exec_data:
+                                            st.caption(f"Neural Signature: `{exec_data.get('neural_signature')}`")
+                                    else:
+                                        # Fallback to standard color-coded JSON if structure is different
+                                        st.json(json_obj)
+                                except Exception as e:
+                                    # Markdown fallback if JSON parsing fails
+                                    st.markdown(f"```json\n{clean_output}\n```")
+                            else:
+                                st.markdown(clean_output)
                         else:
-                            # Failsafe Fallback if AI printed non-JSON markdown paragraphs
-                            outlook = "Active" if pct_change > 0 else "Consolidating"
-                            support = f"${day_low:.2f}"
-                            resistance = f"${day_high:.2f}"
-                            summary = str(clean_output)
-
-                        # FIX 3: Strip newlines/tabs from summary! 
-                        # If we inject raw newlines into the f-string, Streamlit interprets the HTML as an indented markdown code block.
-                        summary = summary.replace("\n", " ").replace("\r", " ").replace("  ", " ")
-
-                        # Render Cyberized Intelligence Box
-                        outlook_color = "#00ff88" if "bull" in outlook.lower() or "up" in outlook.lower() else "#ff3333" if "bear" in outlook.lower() or "down" in outlook.lower() else "#00e5ff"
-                        
-                        # Apply keyword highlights to the summary narrative
-                        highlighted_summary = cyber_highlight(summary) if summary else f"Asset price is hovering in its short-term trading bounds. Active levels suggest consolidation around its 52-week trajectory midpoint."
-
-                        html_code = (
-                            f'<div style="background-color:#08101e; border: 1px solid #00e5ff; border-radius:10px; padding:25px; box-shadow:0 0 15px rgba(0,229,255,0.15); margin-top:15px;">'
-                            f'<h3 style="color:#00e5ff; margin-top:0; font-family:\'Courier New\', monospace; letter-spacing:0.1em; text-shadow:0 0 10px rgba(0,229,255,0.5);">NEURAL INTEGRATION PROTOCOL</h3>'
-                            f'<div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;">'
-                            f'<div style="border-left: 3px solid {outlook_color}; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
-                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Forecast Outlook</div>'
-                            f'<div style="font-size:1.1rem; font-weight:bold; color:{outlook_color};">{outlook}</div>'
-                            f'</div>'
-                            f'<div style="border-left: 3px solid #00ff88; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
-                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Expected Support</div>'
-                            f'<div style="font-size:1.1rem; font-weight:bold; color:#00ff88; font-family: monospace;">{support}</div>'
-                            f'</div>'
-                            f'<div style="border-left: 3px solid #ff3333; background:rgba(30,41,59,0.5); padding:10px 15px; border-radius:0 6px 6px 0; min-width:120px;">'
-                            f'<div class="metric-label" style="font-size:0.7rem; color:#8892b0; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Target Resistance</div>'
-                            f'<div style="font-size:1.1rem; font-weight:bold; color:#ff3333; font-family: monospace;">{resistance}</div>'
-                            f'</div>'
-                            f'</div>'
-                            f'<div style="border-top:1px solid #1e293b; padding-top:15px;">'
-                            f'<h4 style="color:#ccd6f6; margin-top:0; font-size:0.95rem;">PERFORMANCE & MOMENTUM SUMMARY</h4>'
-                            f'<p style="color:#8892b0; font-size:0.9rem; line-height:1.6; margin-bottom:0;">{highlighted_summary}</p>'
-                            f'</div>'
-                            f'</div>'
-                        )
-                        st.markdown(html_code, unsafe_allow_html=True)
+                            st.write(clean_output)
                         
                     else:
                         st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
                 except requests.exceptions.Timeout:
-                    st.warning("TELEMETRY DELAY: Server took too long to compile the neural report. Please re-trigger the link.")
+                    st.warning("🦤 TELEMETRY DELAY: Server took too long to compile the neural report. Please re-trigger the link.")
                 except requests.exceptions.RequestException as e:
-                    st.error(f"PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
+                    st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
