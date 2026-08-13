@@ -19,9 +19,17 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             <h1 style='color: #00e5ff; font-family: monospace;'>🔒 ACCESS DENIED: LEVEL 2 CLEARANCE REQUIRED</h1>
         </div>
         """, unsafe_allow_html=True)
-        st.link_button("UPGRADE TERMINAL ACCESS", stripe_link)
-        
-        st.caption("*If clicking the button above doesn't open Stripe, copy and paste your link into your `.streamlit/secrets.toml` as `STRIPE_CHECKOUT_URL`.*")
+        # Make sure Stripe URL actually exists
+        if not stripe_link:
+            st.error("Stripe checkout link is not configured.")
+            return
+
+        # Display working Stripe button
+        st.link_button(
+            "UPGRADE TERMINAL ACCESS",
+            stripe_link,
+            use_container_width=True
+        )
         return
         
 
