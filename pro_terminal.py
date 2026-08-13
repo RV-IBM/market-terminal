@@ -25,11 +25,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
             return
 
         # Display working Stripe button
-        st.link_button(
-            "UPGRADE TERMINAL ACCESS",
-            stripe_link,
-            use_container_width=True
-        )
+        st.link_button("UPGRADE ACCESS", "https://buy.stripe.com/test_eVqcN4eUHeDq3J8aSDe3e00", use_container_width=True)
         return
         
 
