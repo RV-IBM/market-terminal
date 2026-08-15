@@ -274,7 +274,7 @@ def render_free_terminal(get_stock_data_func):
                 "current_price": current_price,
                 "pct_change": pct_change,
                 "momentum": momentum_state,
-                "instructions": "Conclude your analysis with a clear rating of exactly BUY, HOLD, or SELL. Output MUST be valid JSON."
+                "instructions": "Conclude with a clear rating of exactly BUY, HOLD, or SELL. Output MUST be valid JSON containing keys: outlook_30d, primary_support, primary_resistance, confidence_score, delta_summary, volatility_profile, and contextual_intelligence."
             }
             
             with st.spinner("⚡ Connecting to neural processor..."):
@@ -356,7 +356,7 @@ def render_free_terminal(get_stock_data_func):
                                         col3.metric("🤖 AI Confidence", conf_display)
                                         
                                         # Detailed Expandable Sections
-                                        delta_sum = safe_extract(json_obj, ["delta_summary", "summary", "trend_analysis", "analysis", "reasoning"], "Trend analysis complete.")
+                                        delta_sum = safe_extract(json_obj, ["delta_summary", "trend", "price_action", "technical_analysis", "momentum", "summary", "trend_analysis", "analysis", "reasoning"], "Trend analysis complete.")
                                         vol_profile = safe_extract(json_obj, ["volatility_profile", "volatility", "risk_profile", "risk", "beta"], "Standard market conditions detected.")
                                         context = safe_extract(json_obj, ["contextual_intelligence", "context", "market_context", "fundamental", "news"], "No additional context provided.")
                                         signature = safe_extract(json_obj, ["neural_signature", "signature", "model_id", "model"], "QUANT-MATRIX-v2.5")
