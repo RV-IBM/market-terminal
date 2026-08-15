@@ -140,7 +140,7 @@ def render_pro_terminal(is_premium, get_stock_data_func):
         st.divider()
 
         if st.button("RUN DEEP-DIVE NEURAL VERDICT"):
-            with st.spinner("⚡ Decoding Advanced Quant Telemetry..."):
+            with st.spinner("⚡ Decoding Advanced Institutional Telemetry..."):
                 try:
                     url = st.secrets.get("PIPEDREAM_URL", "")
                     if url:
@@ -165,8 +165,8 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                     
                     def cyber_highlight(text):
                         if not isinstance(text, str): return str(text)
-                        text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum)', r'<span style="color: #00ff88; text-shadow: 0 0 5px #00ff88;">\1</span>', text)
-                        text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown)', r'<span style="color: #ff3333; text-shadow: 0 0 5px #ff3333;">\1</span>', text)
+                        text = re.sub(r'(?i)(bullish|support|rebound|growth|outperform|buy|upside|momentum|accumulate)', r'<span style="color: #00ff88; text-shadow: 0 0 5px rgba(0,255,136,0.3); font-weight:bold;">\1</span>', text)
+                        text = re.sub(r'(?i)(bearish|resistance|contraction|downgrade|sell|downside|risk|breakdown|reduce)', r'<span style="color: #ff3333; text-shadow: 0 0 5px rgba(255,51,51,0.3); font-weight:bold;">\1</span>', text)
                         return text
 
                     json_obj = None
@@ -187,81 +187,178 @@ def render_pro_terminal(is_premium, get_stock_data_func):
                             
                             verdict, v_color = get_final_verdict(json_obj, clean_output)
                             
+                            # Premium UI Banner
                             st.markdown(f"""
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                                <h3 style="margin: 0;">🧠 Neural Analysis: {pro_ticker.upper()}</h3>
-                                <div style="border: 2px solid {v_color}; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 6px; font-weight: bold; color: {v_color}; font-size: 1.2rem; letter-spacing: 0.1em; box-shadow: 0 0 12px {v_color}40;">
-                                    {verdict}
+                            <style>
+                                .pro-verdict-banner {{
+                                    display: flex; justify-content: space-between; align-items: center; 
+                                    background: linear-gradient(90deg, #05070a 0%, #0a0e17 100%);
+                                    border-left: 4px solid {v_color}; padding: 15px 20px; 
+                                    border-radius: 4px; margin-bottom: 20px;
+                                    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                                }}
+                                .pro-verdict-badge {{
+                                    border: 2px solid {v_color}; background: rgba(0,0,0,0.4); 
+                                    padding: 8px 24px; border-radius: 4px; font-weight: 900; 
+                                    color: {v_color}; font-size: 1.4rem; letter-spacing: 0.15em; 
+                                    box-shadow: 0 0 20px {v_color}60; text-transform: uppercase;
+                                }}
+                            </style>
+                            <div class="pro-verdict-banner">
+                                <div>
+                                    <h2 style="margin: 0; color: #fff; font-family: 'Courier New', monospace;">🧠 NEURAL SYNTHESIS</h2>
+                                    <div style="color: #8892b0; font-size: 0.9rem; margin-top: 5px;">INSTITUTIONAL GRADE ANALYSIS :: {pro_ticker.upper()}</div>
                                 </div>
+                                <div class="pro-verdict-badge">{verdict}</div>
                             </div>
                             """, unsafe_allow_html=True)
                             
                             outlook = data.get('outlook_30d', 'Neutral')
                             if "bull" in outlook.lower() or "up" in outlook.lower():
-                                st.success(f"**30-Day Trajectory:** {outlook} 🚀")
+                                st.success(f"**30-Day Trajectory (Institutional Forecast):** {outlook} 🚀")
                             elif "bear" in outlook.lower() or "down" in outlook.lower():
-                                st.error(f"**30-Day Trajectory:** {outlook} 🔻")
+                                st.error(f"**30-Day Trajectory (Institutional Forecast):** {outlook} 🔻")
                             else:
-                                st.warning(f"**30-Day Trajectory:** {outlook} ⚖️")
+                                st.warning(f"**30-Day Trajectory (Institutional Forecast):** {outlook} ⚖️")
                                 
                             quant = data.get("quantitative_trend_telemetry", {})
                             sr = quant.get("support_resistance", {})
                             exec_data = data.get("strategic_execution", {})
                             
-                            c1, c2, c3 = st.columns(3)
+                            st.markdown("### 🎛️ KEY MICROSTRUCTURE ZONES")
+                            c1, c2, c3, c4 = st.columns(4)
                             c1.metric("🛡️ Primary Support", f"${sr.get('primary_support', 'N/A')}")
                             c2.metric("🎯 Primary Resistance", f"${sr.get('primary_resistance', 'N/A')}")
-                            c3.metric("🤖 AI Confidence", f"{exec_data.get('confidence_score', 'N/A')}%")
                             
-                            with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
-                                st.markdown("**Delta Summary**")
-                                st.info(quant.get("delta_summary", "N/A"))
-                                st.markdown("**Volatility Profile**")
-                                st.warning(quant.get("volatility_profile", "N/A"))
-                                
-                            with st.expander("🌐 Contextual Intelligence", expanded=True):
-                                st.write(cyber_highlight(data.get("contextual_intelligence", "N/A")), unsafe_allow_html=True)
+                            conf = exec_data.get('confidence_score', 'N/A')
+                            c3.metric("🤖 AI Confidence", f"{conf}%")
+                            
+                            risk_reward = exec_data.get('risk_reward_profile', 'N/A')
+                            c4.metric("⚖️ Risk/Reward", str(risk_reward).title())
+                            
+                            # Visual representation of AI Confidence
+                            if str(conf).replace('.', '', 1).isdigit():
+                                st.progress(float(conf) / 100.0, text="Neural Model Confidence Matrix")
+                            
+                            st.divider()
+                            
+                            col_q, col_c = st.columns(2)
+                            with col_q:
+                                st.markdown("#### 📊 QUANTITATIVE TELEMETRY")
+                                st.markdown(f"""
+                                <div style="background: #0a0e17; border: 1px solid #1e293b; padding: 15px; border-radius: 6px; height: 100%;">
+                                    <div style="color: #00e5ff; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Trend & Delta Summary</div>
+                                    <div style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">{cyber_highlight(str(quant.get("delta_summary", "N/A")))}</div>
+                                    
+                                    <div style="color: #ffaa00; font-size: 0.85rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase;">Volatility & Risk Profile</div>
+                                    <div style="color: #e2e8f0; font-size: 0.95rem; line-height: 1.6;">{cyber_highlight(str(quant.get("volatility_profile", "N/A")))}</div>
+                                </div>
+                                """, unsafe_allow_html=True)
+
+                            with col_c:
+                                st.markdown("#### 🌐 CONTEXTUAL INTELLIGENCE")
+                                st.markdown(f"""
+                                <div style="background: #0a0e17; border: 1px solid #1e293b; padding: 15px; border-radius: 6px; height: 100%;">
+                                    <div style="color: #ccd6f6; font-size: 0.95rem; line-height: 1.6;">
+                                        {cyber_highlight(str(data.get("contextual_intelligence", "N/A")))}
+                                    </div>
+                                </div>
+                                """, unsafe_allow_html=True)
                                 
                             if "neural_signature" in exec_data:
-                                st.caption(f"Neural Signature: `{exec_data.get('neural_signature')}`")
+                                st.caption(f"**EXECUTION SIGNATURE:** `{exec_data.get('neural_signature')}`")
                         else:
                             verdict, v_color = get_final_verdict(json_obj, clean_output)
                             
+                            # Premium UI Banner for arbitrary JSON data
                             st.markdown(f"""
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                                <h3 style="margin: 0;">🧠 Neural Analysis: {pro_ticker.upper()}</h3>
-                                <div style="border: 2px solid {v_color}; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 6px; font-weight: bold; color: {v_color}; font-size: 1.2rem; letter-spacing: 0.1em; box-shadow: 0 0 12px {v_color}40;">
-                                    {verdict}
+                            <style>
+                                .pro-verdict-banner {{
+                                    display: flex; justify-content: space-between; align-items: center; 
+                                    background: linear-gradient(90deg, #05070a 0%, #0a0e17 100%);
+                                    border-left: 4px solid {v_color}; padding: 15px 20px; 
+                                    border-radius: 4px; margin-bottom: 20px;
+                                    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                                }}
+                                .pro-verdict-badge {{
+                                    border: 2px solid {v_color}; background: rgba(0,0,0,0.4); 
+                                    padding: 8px 24px; border-radius: 4px; font-weight: 900; 
+                                    color: {v_color}; font-size: 1.4rem; letter-spacing: 0.15em; 
+                                    box-shadow: 0 0 20px {v_color}60; text-transform: uppercase;
+                                }}
+                                .cyber-dashboard-grid {{
+                                    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;
+                                }}
+                                .cyber-card-pro {{ 
+                                    background: #0a0e17; border: 1px solid #1e293b; border-radius: 6px; 
+                                    padding: 18px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+                                    font-family: 'Courier New', monospace; line-height: 1.6;
+                                    transition: border-color 0.3s, box-shadow 0.3s;
+                                }}
+                                .cyber-card-pro:hover {{
+                                    border-color: #00e5ff; box-shadow: 0 0 12px rgba(0,229,255,0.15);
+                                }}
+                            </style>
+                            <div class="pro-verdict-banner">
+                                <div>
+                                    <h2 style="margin: 0; color: #fff; font-family: 'Courier New', monospace;">🧠 NEURAL SYNTHESIS</h2>
+                                    <div style="color: #8892b0; font-size: 0.9rem; margin-top: 5px;">INSTITUTIONAL GRADE ANALYSIS :: {pro_ticker.upper()}</div>
                                 </div>
+                                <div class="pro-verdict-badge">{verdict}</div>
                             </div>
                             """, unsafe_allow_html=True)
                             
-                            dashboard_html = "<style>.cyber-card { background: #0a0e17; border: 1px solid #1e293b; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-family: 'Courier New', monospace; line-height: 1.6;}</style><div style='padding: 10px 0;'>"
-                            def build_html(obj):
+                            def build_html(obj, depth=0):
                                 html = ""
                                 if isinstance(obj, dict):
+                                    if depth == 0: html += "<div class='cyber-dashboard-grid'>"
                                     for k, v in obj.items():
                                         clean_k = str(k).replace("_", " ").title()
                                         if isinstance(v, (dict, list)):
-                                            html += f"<div class='cyber-card'><div style='color: #00e5ff; font-weight: bold; border-bottom: 1px solid #1e293b; margin-bottom: 10px;'>{clean_k}</div>{build_html(v)}</div>"
+                                            card_class = "cyber-card-pro" if depth == 0 else ""
+                                            style = "margin-bottom: 15px;" if depth > 0 else ""
+                                            html += f"<div class='{card_class}' style='{style}'><div style='color: #00e5ff; font-weight: bold; border-bottom: 1px solid #1e293b; padding-bottom: 5px; margin-bottom: 10px; text-transform: uppercase;'>{clean_k}</div>{build_html(v, depth+1)}</div>"
                                         else:
-                                            html += f"<div><span style='color: #8892b0; font-weight: bold;'>{clean_k}: </span><span style='color: #e2e8f0;'>{cyber_highlight(str(v))}</span></div>"
+                                            html += f"<div style='margin-bottom: 8px;'><span style='color: #8892b0; font-size: 0.85rem; text-transform: uppercase;'>{clean_k}</span><br><span style='color: #e2e8f0; font-size: 1.05rem; font-weight: bold;'>{cyber_highlight(str(v))}</span></div>"
+                                    if depth == 0: html += "</div>"
                                 elif isinstance(obj, list):
-                                    for item in obj: html += f"<div style='margin-left: 15px; border-left: 1px solid #1e293b; padding-left: 10px;'>{build_html(item)}</div>"
+                                    html += "<ul style='margin-left: 20px; padding-left: 0; color: #e2e8f0;'>"
+                                    for item in obj: 
+                                        html += f"<li style='margin-bottom: 5px;'>{build_html(item, depth+1)}</li>"
+                                    html += "</ul>"
                                 else:
                                     html += f"<span style='color: #e2e8f0;'>{cyber_highlight(str(obj))}</span>"
                                 return html
-                            st.markdown(dashboard_html + build_html(json_obj) + "</div>", unsafe_allow_html=True)
+                            
+                            st.markdown(f"<div style='padding: 10px 0;'>{build_html(json_obj)}</div>", unsafe_allow_html=True)
                     else:
                         verdict, v_color = get_final_verdict(None, clean_output)
                         st.markdown(f"""
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-                            <h3 style="margin: 0;">🧠 Neural Analysis: {pro_ticker.upper()}</h3>
-                            <div style="border: 2px solid {v_color}; background: rgba(0,0,0,0.3); padding: 6px 16px; border-radius: 6px; font-weight: bold; color: {v_color}; font-size: 1.2rem; letter-spacing: 0.1em; box-shadow: 0 0 12px {v_color}40;">
-                                {verdict}
+                        <style>
+                            .pro-verdict-banner {{
+                                display: flex; justify-content: space-between; align-items: center; 
+                                background: linear-gradient(90deg, #05070a 0%, #0a0e17 100%);
+                                border-left: 4px solid {v_color}; padding: 15px 20px; 
+                                border-radius: 4px; margin-bottom: 20px;
+                                box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                            }}
+                            .pro-verdict-badge {{
+                                border: 2px solid {v_color}; background: rgba(0,0,0,0.4); 
+                                padding: 8px 24px; border-radius: 4px; font-weight: 900; 
+                                color: {v_color}; font-size: 1.4rem; letter-spacing: 0.15em; 
+                                box-shadow: 0 0 20px {v_color}60; text-transform: uppercase;
+                            }}
+                        </style>
+                        <div class="pro-verdict-banner">
+                            <div>
+                                <h2 style="margin: 0; color: #fff; font-family: 'Courier New', monospace;">🧠 NEURAL SYNTHESIS</h2>
+                                <div style="color: #8892b0; font-size: 0.9rem; margin-top: 5px;">INSTITUTIONAL GRADE ANALYSIS :: {pro_ticker.upper()}</div>
                             </div>
+                            <div class="pro-verdict-badge">{verdict}</div>
                         </div>
-                        <div style='background: #0a0e17; padding: 20px; color: #e2e8f0; font-family: monospace; white-space: pre-wrap; line-height: 1.6;'>{cyber_highlight(clean_output)}</div>
+                        <div style='background: #0a0e17; border: 1px solid #1e293b; padding: 25px; border-radius: 6px; color: #e2e8f0; font-family: \"Courier New\", monospace; white-space: pre-wrap; line-height: 1.7; font-size: 1.05rem; box-shadow: 0 4px 10px rgba(0,0,0,0.2);'>
+                            {cyber_highlight(clean_output)}
+                        </div>
                         """, unsafe_allow_html=True)
                 
                 except Exception as e:
