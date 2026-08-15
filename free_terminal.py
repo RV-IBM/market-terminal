@@ -4,6 +4,35 @@ import json
 import ast
 import re
 
+def sanitize_json_response(raw_text):
+    """Strips reasoning/thinking tags and parses JSON from raw backend response."""
+    clean_text = re.sub(r'<think>.*?</think>', '', str(raw_text), flags=re.DOTALL).strip()
+    
+    if "```json" in clean_text.lower():
+        try:
+            clean_text = clean_text.split("```json")[1].split("```")[0].strip()
+        except Exception:
+            pass
+    elif "```" in clean_text:
+        try:
+            clean_text = clean_text.split("```")[1].split("```")[0].strip()
+        except Exception:
+            pass
+            
+    if "{" in clean_text and "}" in clean_text:
+        try:
+            start = clean_text.find("{")
+            end = clean_text.rfind("}") + 1
+            json_substr = clean_text[start:end]
+            try:
+                return json.loads(json_substr), clean_text
+            except Exception:
+                safe_str = json_substr.replace("'", '"').replace("True", "true").replace("False", "false")
+                return json.loads(safe_str), clean_text
+        except Exception:
+            pass
+    return None, clean_text
+
 def get_final_verdict(data_obj, raw_text):
     """Analyzes AI output to determine a strict BUY, HOLD, or SELL conclusion."""
     search_text = (str(data_obj) + " " + str(raw_text)).upper()
@@ -38,17 +67,36 @@ def cyber_highlight(text):
     return text
 
 def safe_extract(data_obj, possible_keys, default="N/A"):
-    """Recursively searches a dictionary for the first matching key to prevent N/A errors."""
-    if not isinstance(data_obj, dict):
-        return default
-    for k in possible_keys:
-        if k in data_obj and data_obj[k] not in [None, "", "N/A", "null"]:
-            return data_obj[k]
-    for v in data_obj.values():
-        if isinstance(v, dict):
-            result = safe_extract(v, possible_keys, None)
-            if result is not None:
-                return result
+    """Recursively and aggressively searches a dictionary/list for fuzzy key matches."""
+    if isinstance(data_obj, dict):
+        # 1. Exact match checking
+        for k in possible_keys:
+            if k in data_obj and data_obj[k] not in [None, "", "N/A", "null", []]:
+                val = data_obj[k]
+                if isinstance(val, list) and len(val) > 0: return val[0]
+                if not isinstance(val, (dict, list)): return val
+        
+        # 2. Fuzzy key match (substring)
+        for k, v in data_obj.items():
+            k_lower = str(k).lower()
+            for pk in possible_keys:
+                if pk.lower() in k_lower and v not in [None, "", "N/A", "null", []]:
+                    if isinstance(v, list) and len(v) > 0:
+                        if not isinstance(v[0], (dict, list)): return v[0]
+                    elif not isinstance(v, (dict, list)): 
+                        return v
+                        
+        # 3. Recursive search in values
+        for v in data_obj.values():
+            res = safe_extract(v, possible_keys, None)
+            if res is not None: return res
+            
+    elif isinstance(data_obj, list):
+        # Recurse into lists
+        for item in data_obj:
+            res = safe_extract(item, possible_keys, None)
+            if res is not None: return res
+            
     return default
 
 def render_free_terminal(get_stock_data_func):
@@ -226,7 +274,7 @@ def render_free_terminal(get_stock_data_func):
                 "current_price": current_price,
                 "pct_change": pct_change,
                 "momentum": momentum_state,
-                "instructions": "Conclude your analysis with a clear rating of exactly BUY, HOLD, or SELL."
+                "instructions": "Conclude your analysis with a clear rating of exactly BUY, HOLD, or SELL. Output MUST be valid JSON."
             }
             
             with st.spinner("⚡ Connecting to neural processor..."):
@@ -251,6 +299,19 @@ def render_free_terminal(get_stock_data_func):
                             import re
                             clean_output = re.sub(r'<think>.*?</think>', '', clean_output, flags=re.DOTALL).strip()
                             
+                            # Strip Markdown formatting (code blocks)
+                            if "```json" in clean_output.lower():
+                                try: clean_output = clean_output.split(re.search(r'```json', clean_output, re.IGNORECASE).group())[1].split("```")[0].strip()
+                                except: pass
+                            elif "```" in clean_output:
+                                try: clean_output = clean_output.split("```")[1].split("```")[0].strip()
+                                except: pass
+                                
+                            # Isolate JSON block if there's conversational text wrapping it
+                            json_match = re.search(r'\{.*\}', clean_output, re.DOTALL)
+                            if json_match:
+                                clean_output = json_match.group(0)
+                            
                             # --- SMART JSON DETECTOR & PREMIUM DASHBOARD ---
                             if clean_output.startswith("{") and clean_output.endswith("}"):
                                 try:
@@ -272,7 +333,7 @@ def render_free_terminal(get_stock_data_func):
                                         """, unsafe_allow_html=True)
                                         
                                         # Dynamic Robust Extractors
-                                        outlook = safe_extract(json_obj, ["outlook_30d", "outlook", "trajectory", "forecast"], "Neutral")
+                                        outlook = safe_extract(json_obj, ["outlook_30d", "outlook", "trajectory", "forecast", "prediction", "trend"], "Neutral")
                                         if "Bullish" in str(outlook) or "up" in str(outlook).lower():
                                             st.success(f"**30-Day Outlook:** {outlook} 🚀")
                                         elif "Bearish" in str(outlook) or "down" in str(outlook).lower():
@@ -280,9 +341,9 @@ def render_free_terminal(get_stock_data_func):
                                         else:
                                             st.warning(f"**30-Day Outlook:** {outlook} ⚖️")
                                         
-                                        support_val = safe_extract(json_obj, ["primary_support", "support_level", "support", "support_1"], "N/A")
-                                        resistance_val = safe_extract(json_obj, ["primary_resistance", "resistance_level", "resistance", "resistance_1"], "N/A")
-                                        confidence_val = safe_extract(json_obj, ["confidence_score", "confidence", "ai_confidence", "probability"], "N/A")
+                                        support_val = safe_extract(json_obj, ["primary_support", "support_level", "support", "support_1", "floor"], "N/A")
+                                        resistance_val = safe_extract(json_obj, ["primary_resistance", "resistance_level", "resistance", "resistance_1", "ceiling", "target"], "N/A")
+                                        confidence_val = safe_extract(json_obj, ["confidence_score", "confidence", "ai_confidence", "probability", "score"], "N/A")
                                         
                                         col1, col2, col3 = st.columns(3)
                                         
@@ -295,10 +356,10 @@ def render_free_terminal(get_stock_data_func):
                                         col3.metric("🤖 AI Confidence", conf_display)
                                         
                                         # Detailed Expandable Sections
-                                        delta_sum = safe_extract(json_obj, ["delta_summary", "summary", "trend_analysis", "analysis"], "Trend analysis complete.")
-                                        vol_profile = safe_extract(json_obj, ["volatility_profile", "volatility", "risk_profile", "risk"], "Standard market conditions detected.")
-                                        context = safe_extract(json_obj, ["contextual_intelligence", "context", "market_context", "reasoning"], "No additional context provided.")
-                                        signature = safe_extract(json_obj, ["neural_signature", "signature", "model_id"], "QUANT-MATRIX-v2.5")
+                                        delta_sum = safe_extract(json_obj, ["delta_summary", "summary", "trend_analysis", "analysis", "reasoning"], "Trend analysis complete.")
+                                        vol_profile = safe_extract(json_obj, ["volatility_profile", "volatility", "risk_profile", "risk", "beta"], "Standard market conditions detected.")
+                                        context = safe_extract(json_obj, ["contextual_intelligence", "context", "market_context", "fundamental", "news"], "No additional context provided.")
+                                        signature = safe_extract(json_obj, ["neural_signature", "signature", "model_id", "model"], "QUANT-MATRIX-v2.5")
 
                                         with st.expander("📊 Quantitative Trend Telemetry", expanded=True):
                                             st.markdown("**Delta Summary**")
@@ -311,19 +372,3 @@ def render_free_terminal(get_stock_data_func):
                                             
                                         st.caption(f"Neural Signature: `{signature}`")
                                     else:
-                                        # Fallback to standard color-coded JSON if it's not a dict
-                                        st.json(json_obj)
-                                except Exception as e:
-                                    # Markdown fallback if JSON parsing fails
-                                    st.markdown(f"```json\n{clean_output}\n```")
-                            else:
-                                st.markdown(clean_output)
-                        else:
-                            st.write(clean_output)
-                        
-                    else:
-                        st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
-                except requests.exceptions.Timeout:
-                    st.warning("🦤 TELEMETRY DELAY: Server took too long to compile the neural report. Please re-trigger the link.")
-                except requests.exceptions.RequestException as e:
-                    st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
