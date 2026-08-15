@@ -372,3 +372,17 @@ def render_free_terminal(get_stock_data_func):
                                             
                                         st.caption(f"Neural Signature: `{signature}`")
                                     else:
+                                        st.json(json_obj)
+                                except Exception as e:
+                                    # Fallback rendering if JSON parsing fails mid-way
+                                    st.markdown(f"<div class='cyber-card'>{cyber_highlight(clean_output)}</div>", unsafe_allow_html=True)
+                            else:
+                                # Fallback rendering for raw text responses
+                                st.markdown(f"<div class='cyber-card'>{cyber_highlight(clean_output)}</div>", unsafe_allow_html=True)
+                    else:
+                        st.error(f"NEURAL LINK FAILURE: Server returned status {res.status_code}")
+                        
+                except requests.exceptions.Timeout:
+                    st.warning("🦤 TELEMETRY DELAY: Matrix generation took longer than 60 seconds.")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"⚠️ PIPELINE ERROR: Interface gateway disconnected. Details: {e}")
